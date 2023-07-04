@@ -1,0 +1,5 @@
+# Required Python Modules
+
+# Website
+flask
+Flask-Navigation

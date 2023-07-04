@@ -1,0 +1,18 @@
+
+body {
+    background-color: #131313;
+    color: #FCFCFC;
+  }
+
+.cs-background-dark { background-color: #131313; }
+.cs-color-dark { color: #131313; }
+  
+.cs-background-primary { background-color: #18181A; }
+.cs-color-primary { color: #18181A; }
+
+.cs-background-secondary { background-color: #353535; }
+.cs-color-secondary{ color: #353535; }
+
+.cs-background-light { background-color: #FCFCFC; }
+.cs-color-light { color: #FCFCFC; }
+
