@@ -4,3 +4,4 @@
 flask
 Flask-Navigation
 ploty
+pandas~=1.3.5
