@@ -7,6 +7,8 @@ import pandas as pd
 import json
 import plotly
 import plotly.express as px
+import plotly.graph_objs as go
+
 import algorithm.analysis as analysis
 
 app = Flask(__name__)
@@ -20,9 +22,17 @@ mapping = {
     'CRITICAL': 10
 }
 
-global df
+global df, filtered_df
 df = analysis.load_data(file_location)
 df = analysis.map_words_to_values(df, 'Mixed_baseSeverity', mapping)
+
+variables_of_interest = ['Mixed_exploitabilityScore',
+                         'Mixed_impactScore',
+                         'Mixed_baseSeverity',
+                         'Mixed_basedScore']
+
+# Remove all score which is 0 or na
+filtered_df = df[(df[variables_of_interest] != 0).dropna().all(axis=1)]
 
 
 @app.route('/')
@@ -68,21 +78,27 @@ def about():
 
 @app.route('/analytics')
 def analytics():
-    global df
-
-    variables_of_interest = ['Mixed_exploitabilityScore',
-                             'Mixed_impactScore',
-                             'Mixed_baseSeverity',
-                             'Mixed_basedScore']
+    global df, filtered_df
 
     # Perform your analysis
-    analysis_df = analysis.analyze_attack_vectors(df, 5)
+    # analysis_df = analysis.analyze_attack_vectors(filtered_df, 5)
 
-    # Plotting the data
-    fig = px.bar(analysis_df, x='vulnerability', y='Frequency', color='Mean_Severity',
-                 title='Top 5 Vulnerabilities by Frequency and Mean Severity')
+    # Get a dictionary of yearly vulnerabilities dataframes
+    vulnerability_dict = analysis.store_vulnerabilities_in_dict(filtered_df, 'vulnerability', True)
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    # Create a list of line traces
+    traces = []
+    for vulnerability, df in vulnerability_dict.items():
+        trace = go.Scatter(
+            x=df['cve.published'],
+            y=df['Number_of_Vulnerabilities'],
+            mode='lines',
+            name=vulnerability
+        )
+        traces.append(trace)
+
+    # Convert to JSON
+    graphJSON = json.dumps(traces, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('analytics.html', graphJSON=graphJSON)
 

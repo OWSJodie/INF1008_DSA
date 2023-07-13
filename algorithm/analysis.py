@@ -254,20 +254,19 @@ def main():  # run this py module will run main function code
     df['cve.published'] = pd.to_datetime(df['cve.published'])
 
     filtered_df = df[(df[variables_of_interest] != 0).dropna().all(axis=1)]
-    correlations = calculate_variable_correlations(filtered_df, 'vulnerability', variables_of_interest)
-    top_attack_vectors = analyze_attack_vectors(df, 5)
+    #correlations = calculate_variable_correlations(filtered_df, 'vulnerability', variables_of_interest)
+    #top_attack_vectors = analyze_attack_vectors(df, 5)
 
     # Count the number of 'DDoS' vulnerabilities per month
-    monthly_ddos_vulnerabilities = count_monthly_vulnerabilities(df, 'cve.published', 'vulnerability', 'DDos')
+   # monthly_ddos_vulnerabilities = count_monthly_vulnerabilities(df, 'cve.published', 'vulnerability', 'DDos')
 
     vulnerability_dict = store_vulnerabilities_in_dict(filtered_df, 'vulnerability', True)
 
     # print("Number of DDoS Vulnerabilities Over Time:")
     # print(monthly_ddos_vulnerabilities)
 
-    print("DDos Vulnerabilities:")
+    print("Vulnerabilities:")
     print(vulnerability_dict)
-    print(vulnerability_dict['DDos'])
 
 
 # print("Correlations:")

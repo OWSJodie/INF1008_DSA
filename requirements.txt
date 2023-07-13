@@ -3,6 +3,5 @@
 # Website
 flask~=2.3.2
 Flask-Navigation
-ploty
 pandas~=1.3.5
 plotly~=5.15.0
