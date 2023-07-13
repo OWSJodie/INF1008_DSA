@@ -133,6 +133,103 @@ def analyze_attack_vectors(df, top_few):
     return top_attack_vectors
 
 
+def convert_date_column(df, date_column):
+    """
+    Convert the date column to datetime and resample to get the number of vulnerabilities per month.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+    - date_column (str): The name of the date column.
+
+    Returns:
+    - df (pandas.DataFrame): The DataFrame with the date column converted to datetime.
+    """
+    df[date_column] = pd.to_datetime(df[date_column])
+    return df
+
+
+def plot_vulnerabilities_over_time(df, date_column):
+    """
+    Plot the number of vulnerabilities over time.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+    - date_column (str): The name of the date column.
+    """
+    monthly_vulnerabilities = df.resample('M', on=date_column).size()
+    monthly_vulnerabilities.plot()
+
+
+def count_monthly_vulnerabilities(df, date_column, vulnerability_column, specific_vulnerability=None):
+    """
+    Count the number of specific vulnerabilities per month. If a specific vulnerability is provided, only count that vulnerability.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+    - date_column (str): The name of the date column.
+    - vulnerability_column (str): The name of the vulnerability column.
+    - specific_vulnerability (str, optional): The name of a specific vulnerability to count.
+
+    Returns:
+    - monthly_vulnerabilities (pandas.DataFrame): The DataFrame with the number of specific vulnerabilities per month.
+    """
+    df_copy = df.copy()  # create a copy of the dataframe
+    df_copy[date_column] = pd.to_datetime(df_copy[date_column])
+    df_copy.set_index(date_column, inplace=True)
+    if specific_vulnerability is not None:
+        df_copy = df_copy[df_copy[vulnerability_column] == specific_vulnerability]
+    monthly_vulnerabilities = df_copy.groupby([pd.Grouper(freq='M'), vulnerability_column]).size().reset_index()
+    monthly_vulnerabilities.columns = [date_column, vulnerability_column, 'Number_of_Vulnerabilities']
+    return monthly_vulnerabilities
+
+
+def count_yearly_vulnerabilities(df, date_column, vulnerability_column, specific_vulnerability=None):
+    """
+    Count the number of specific vulnerabilities per year. If a specific vulnerability is provided, only count that vulnerability.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+    - date_column (str): The name of the date column.
+    - vulnerability_column (str): The name of the vulnerability column.
+    - specific_vulnerability (str, optional): The name of a specific vulnerability to count.
+
+    Returns:
+    - yearly_vulnerabilities (pandas.DataFrame): The DataFrame with the number of specific vulnerabilities per year.
+    """
+    df_copy = df.copy()  # create a copy of the dataframe
+    df_copy[date_column] = pd.to_datetime(df_copy[date_column])
+    df_copy.set_index(date_column, inplace=True)
+    if specific_vulnerability is not None:
+        df_copy = df_copy[df_copy[vulnerability_column] == specific_vulnerability]
+    yearly_vulnerabilities = df_copy.groupby([pd.Grouper(freq='Y'), vulnerability_column]).size().reset_index()
+    yearly_vulnerabilities.columns = [date_column, vulnerability_column, 'Number_of_Vulnerabilities']
+    return yearly_vulnerabilities
+
+
+def store_vulnerabilities_in_dict(df, vulnerability_column, year):
+    """
+    Store the DataFrame for each unique vulnerability in a dictionary.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+    - vulnerability_column (str): The name of the vulnerability column.
+    - year (boolean): True, data will be sorted by year ,else it will be sorted by month .
+
+    Returns:
+    - vulnerability_dict (dict): A dictionary where the keys are the vulnerability names and the values are the corresponding DataFrames.
+    """
+    vulnerabilities = df[vulnerability_column].dropna().unique()
+    if year:
+        vulnerability_dict = {
+            vulnerability: count_yearly_vulnerabilities(df, 'cve.published', vulnerability_column, vulnerability) for
+            vulnerability in vulnerabilities}
+    else:
+        vulnerability_dict = {
+            vulnerability: count_monthly_vulnerabilities(df, 'cve.published', vulnerability_column, vulnerability) for
+            vulnerability in vulnerabilities}
+    return vulnerability_dict
+
+
 def main():  # run this py module will run main function code
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
@@ -151,16 +248,32 @@ def main():  # run this py module will run main function code
                              'Mixed_basedScore']
 
     df = load_data(file_location)
+
     df = map_words_to_values(df, 'Mixed_baseSeverity', mapping)
+
+    df['cve.published'] = pd.to_datetime(df['cve.published'])
+
     filtered_df = df[(df[variables_of_interest] != 0).dropna().all(axis=1)]
     correlations = calculate_variable_correlations(filtered_df, 'vulnerability', variables_of_interest)
-
     top_attack_vectors = analyze_attack_vectors(df, 5)
 
-    print("Correlations:")
-    print(correlations)
-    print("Top Attack Vectors:")
-    print(top_attack_vectors)
+    # Count the number of 'DDoS' vulnerabilities per month
+    monthly_ddos_vulnerabilities = count_monthly_vulnerabilities(df, 'cve.published', 'vulnerability', 'DDos')
+
+    vulnerability_dict = store_vulnerabilities_in_dict(filtered_df, 'vulnerability', True)
+
+    # print("Number of DDoS Vulnerabilities Over Time:")
+    # print(monthly_ddos_vulnerabilities)
+
+    print("DDos Vulnerabilities:")
+    print(vulnerability_dict)
+    print(vulnerability_dict['DDos'])
+
+
+# print("Correlations:")
+# print(correlations)
+# print("Top Attack Vectors:")
+# print(top_attack_vectors)
 
 
 if __name__ == '__main__':
