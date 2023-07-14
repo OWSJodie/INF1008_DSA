@@ -38,6 +38,7 @@ def analytics():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('analytics.html', graphJSON=graphJSON)
+    
 
 @app.route('/resources')
 def resources():
