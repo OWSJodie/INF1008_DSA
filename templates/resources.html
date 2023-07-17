@@ -11,6 +11,30 @@
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="static/css/style.css">
 
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        li {
+            color: white;
+        }
+
+        .list-group-item {
+            background-color: black;
+            color: white;
+            border: 1px solid white;
+        }
+    </style>
+
     <title>RansomX</title>
 </head>
 
@@ -30,34 +54,48 @@
                 <li class="nav-item">
                     <a class="nav-link text-muted" href="about">About</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-light active" href="../news">News</a>
+                </li>
             </ul>
         </div>
     </nav>
     <hr class="bg-secondary mx-3 mt-0">
 
     <!-- Page Content -->
-    Resources
-                <h1>Ransomware Attacks and Counter Measures</h1>
+    <div class="container">
+        <h1>Ransomware Attacks and Counter Measures</h1>
 
-                <h2>Common Ransomware Attacks</h2>
-                <ul>
-                    <li>WannaCry</li>
-                    <li>Petya</li>
-                    <li>Locky</li>
-                    <li>CryptoLocker</li>
-                    <li>Ryuk</li>
-                    <li>SamSam</li>
-                </ul>
-                <h2>Counter Measures</h2>
-                <ul>
-                    <li>Regularly backup your data and keep offline backups</li>
-                    <li>Use reliable and up-to-date antivirus/anti-malware software.</li>
-                    <li>Keep your operating system and software up to date with the latest security patches.</li>
-                    <li>Be cautious when opening email attachments or clicking on suspicious links.</li>
-                    <li>Enable a firewall and use network segmentation to isolate critical systems. </li>
-                    <li>Implement strong and unique passwords for all accounts. </li>
-                    <li>Educate employees about ransomware threats and safe computing practices.</li>
-                </ul>
+        <div class="section">
+            <h2>Common Ransomware Attacks</h2>
+            <ul class="list-group">
+                <li class="list-group-item">WannaCry</li>
+                <li class="list-group-item">Petya</li>
+                <li class="list-group-item">Locky</li>
+                <li class="list-group-item">CryptoLocker</li>
+                <li class="list-group-item">Ryuk</li>
+                <li class="list-group-item">SamSam</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Counter Measures</h2>
+            <ul class="list-group">
+                <li class="list-group-item">Regularly backup your data and keep offline backups</li>
+                <li class="list-group-item">Use reliable and up-to-date antivirus/anti-malware software.</li>
+                <li class="list-group-item">Keep your operating system and software up to date with the latest security
+                    patches.</li>
+                <li class="list-group-item">Be cautious when opening email attachments or clicking on suspicious links.
+                </li>
+                <li class="list-group-item">Enable a firewall and use network segmentation to isolate critical systems.
+                </li>
+                <li class="list-group-item">Implement strong and unique passwords for all accounts.</li>
+                <li class="list-group-item">Educate employees about ransomware threats and safe computing practices.
+                </li>
+            </ul>
+        </div>
+    </div>
+
 </body>
 
 </html>

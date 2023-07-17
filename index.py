@@ -8,7 +8,7 @@ import json
 import plotly
 import plotly.express as px
 import plotly.graph_objs as go
-
+from cybernews.cybernews import CyberNews
 import algorithm.analysis as analysis
 
 app = Flask(__name__)
@@ -76,6 +76,40 @@ def about():
     return render_template('about.html')
 
 
+@app.route('/news')
+def news():
+    return render_template('news.html')
+
+
+@app.route('/news/general')
+def general_news():
+    # Fetch general news articles from CyberNews
+    cybernews = CyberNews()
+    news = cybernews.get_news("general")
+
+    return render_template('general_news.html', news=news)
+
+
+@app.route('/news/data-breach')
+def data_breach_news():
+    # Fetch data breach news articles from CyberNews
+    cybernews = CyberNews()
+    news = cybernews.get_news("dataBreach")
+
+    return render_template('data_breach_news.html', news=news)
+
+
+@app.route('/news/cyber-attack')
+def cyber_attack_news():
+    # Fetch cyber attack news articles from CyberNews
+    cybernews = CyberNews()
+    news = cybernews.get_news("cyberAttack")
+
+    return render_template('cyber_attack_news.html', news=news)
+
+# Add more routes for other news categories
+
+
 @app.route('/analytics')
 def analytics():
     global df, filtered_df
@@ -84,7 +118,8 @@ def analytics():
     # analysis_df = analysis.analyze_attack_vectors(filtered_df, 5)
 
     # Get a dictionary of yearly vulnerabilities dataframes
-    vulnerability_dict = analysis.store_vulnerabilities_in_dict(filtered_df, 'vulnerability', True)
+    vulnerability_dict = analysis.store_vulnerabilities_in_dict(
+        filtered_df, 'vulnerability', True)
 
     # Create a list of line traces
     traces = []
