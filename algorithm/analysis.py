@@ -1,19 +1,26 @@
 import pandas as pd
-
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 def load_data(filename):
     """
-    Load the data from the Excel file.
+    Load the data from the csv file.
 
     Parameters:
-    - filename (str): The path to the Excel file.
+    - filename (str): The path to the csv file.
 
     Returns:
     - df (pandas.DataFrame): The DataFrame containing the data.
     """
-    df = pd.read_excel(filename)
+
+    df = pd.read_csv(filename,dtype=str, low_memory=False)
     return df
 
+
+def convert_xlsx_to_csv(filename, file_location):
+    df = pd.read_excel(filename)
+    df.to_csv(file_location, index=False)
 
 def map_words_to_values(df, column_name, mapping):
     """
@@ -233,7 +240,11 @@ def store_vulnerabilities_in_dict(df, vulnerability_column, year):
 def main():  # run this py module will run main function code
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
+
     file_location = '../dataset/updated_cve_2023_07_09.xlsx'
+    csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
+    convert_xlsx_to_csv(file_location, csv_file_location)
+    threshold = 2.5
 
     mapping = {
         'LOW': 2.5,
@@ -247,26 +258,32 @@ def main():  # run this py module will run main function code
                              'Mixed_baseSeverity',
                              'Mixed_basedScore']
 
-    df = load_data(file_location)
-
+    df = load_data(csv_file_location)
     df = map_words_to_values(df, 'Mixed_baseSeverity', mapping)
-
     df['cve.published'] = pd.to_datetime(df['cve.published'])
 
     filtered_df = df[(df[variables_of_interest] != 0).dropna().all(axis=1)]
-    #correlations = calculate_variable_correlations(filtered_df, 'vulnerability', variables_of_interest)
-    #top_attack_vectors = analyze_attack_vectors(df, 5)
 
-    # Count the number of 'DDoS' vulnerabilities per month
-   # monthly_ddos_vulnerabilities = count_monthly_vulnerabilities(df, 'cve.published', 'vulnerability', 'DDos')
+    # Drop rows with missing values
+    df = df.dropna(subset=['Mixed_basedScore', 'Mixed_exploitabilityScore', 'Mixed_impactScore', 'Mixed_baseSeverity'])
 
-    vulnerability_dict = store_vulnerabilities_in_dict(filtered_df, 'vulnerability', True)
+    # Define the outcome variable
+    df['Attack'] = (df['Mixed_baseSeverity'] > threshold).astype(int)  # replace 'threshold' with your chosen threshold
+    features = ['Mixed_basedScore', 'Mixed_exploitabilityScore', 'Mixed_impactScore']
+    X = df[features]
+    y = df['Attack']
 
-    # print("Number of DDoS Vulnerabilities Over Time:")
-    # print(monthly_ddos_vulnerabilities)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = LogisticRegression()
+    model.fit(X_train, y_train)
 
-    print("Vulnerabilities:")
-    print(vulnerability_dict)
+    y_pred = model.predict(X_test)
+    print(accuracy_score(y_test, y_pred))
+
+    print("Predicted outcomes:", y_pred)
+    print("Actual outcomes:", y_test)
+
+
 
 
 # print("Correlations:")
