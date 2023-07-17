@@ -5,3 +5,5 @@ flask~=2.3.2
 Flask-Navigation
 pandas~=1.3.5
 plotly~=5.15.0
+cybernews~=1.1.2
+scikit-learn~=1.3.0
