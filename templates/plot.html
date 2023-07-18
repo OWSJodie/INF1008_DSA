@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plot</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<div class="container">
+<form action="/submit" method="POST">
+    <input type="text" name="user_input_threshold" placeholder="Enter your text here">
+    <input type="text" name="user_input_generate_size" placeholder="Enter your text here">
+    <input type="submit" value="Submit">
+</form>
+    <div id="plot"></div>
+    <script>
+        var graph = {{ graphJSON | safe }};
+        Plotly.newPlot('plot', graph, {responsive: true});
+    </script>
+</div>
+
+</body>
+</html>
