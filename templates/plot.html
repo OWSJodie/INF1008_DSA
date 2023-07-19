@@ -1,22 +1,71 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+
 <head>
-    <title>Plot</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="static/css/style.css">
+
+    <title>RansomX</title>
 </head>
+
 <body>
+<!-- Top Navigation Bar -->
+<nav class="navbar navbar-expand-sm">
+    <img class="navbar-brand" src="../static/images/image.jpg" width="25px" alt="">
+    RansomX
+    <div class="collapse navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link text-light active" href="analytics">Analytics<span
+                        class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted" href="resources">Resources</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted" href="about">About</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light active" href="../news">News</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<hr class="bg-secondary mx-3 mt-0">
+
+<!-- Page Content -->
 <div class="container">
-<form action="/submit" method="POST">
-    <input type="text" name="user_input_top_vul" placeholder="Enter your text here">
-    <input type="text" name="user_input_generate_size" placeholder="Enter your text here">
-    <input type="submit" value="Submit">
-</form>
-    <div id="plot"></div>
-    <script>
-        var graph = {{ graphJSON | safe }};
-        Plotly.newPlot('plot', graph, {responsive: true});
-    </script>
+    Prediction
+    <div class="row">
+        <div class="col-4">
+            <form action="/submit" method="POST">
+                <input type="text" name="user_input_top_vul" placeholder="Enter your text here">
+                <input type="text" name="user_input_generate_size" placeholder="Enter your text here">
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+        <div class="col-8">
+            2 of 3 (wider)
+        </div>
+    </div>
+        <div class= "mt-1" id="plot"></div>
 </div>
 
+
 </body>
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script>
+        var graph = {{ graphJSON | safe }};
+        Plotly.newPlot('plot', graph, {responsive: true});
+
+
+</script>
+
 </html>
