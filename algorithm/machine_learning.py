@@ -1,8 +1,10 @@
 import joblib
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score, roc_auc_score
 from os import path
+
 
 class VulnerabilityModel:
     def __init__(self, data):
@@ -13,10 +15,13 @@ class VulnerabilityModel:
         X_test, y_test = None, None  # Initialize X_test and y_test
 
         # Define the outcome variable
-        self.data['Attack'] = (self.data['Mixed_baseSeverity'] > threshold).astype(int)
-        features = ['Mixed_basedScore', 'Mixed_exploitabilityScore', 'Mixed_impactScore']
+        features = ['Mixed_basedScore', 'Mixed_exploitabilityScore', 'Mixed_impactScore', "Mixed_obtainPrivilege",
+                    "Mixed_userInteractionRequired"]
         X = self.data[features]
-        y = self.data['Attack']
+        y = pd.to_numeric(self.data['Mixed_baseSeverity'], errors='coerce') > threshold
+        severity_counts = self.data['Mixed_baseSeverity'].value_counts()
+        print("this is severity_counts: ")
+        print(severity_counts)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         self.model = LogisticRegression()
@@ -27,9 +32,6 @@ class VulnerabilityModel:
 
         # Get predicted probabilities
         y_pred_proba = self.model.predict_proba(X_test)[:, 1]
-
-
-
 
         return y_test, y_pred_proba, X_test
 

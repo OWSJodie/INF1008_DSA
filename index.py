@@ -16,13 +16,8 @@ file_location = 'dataset/updated_cve_2023_07_09.csv'
 MAPPING, THRESHOLD, VARIABLES_OF_INTEREST = config.MAPPING, config.THRESHOLD, config.VARIABLES_OF_INTEREST
 
 df = dp.load_data(file_location)
-df = dp.map_words_to_values(df, 'Mixed_baseSeverity', MAPPING)
 
-filtered_df = df[(df[VARIABLES_OF_INTEREST] != 0).dropna().all(axis=1)]
-
-# Train the model
-vulnerability_model = ml.VulnerabilityModel(df)
-model = vulnerability_model.train_model(THRESHOLD)
+filtered_df = df.dropna(subset=VARIABLES_OF_INTEREST, how='all')
 
 # Store analysis results globally
 global analysis_results
@@ -114,15 +109,17 @@ def plot():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    user_input_threshold = request.form.get('user_input_threshold')
-    user_input_generate_size = request.form.get('user_input_generate_size')
+    print("test")
+    print(df['Mixed_baseSeverity'].value_counts())
+    #user_input_threshold = request.form.get('user_input_threshold')
+    #user_input_generate_size = request.form.get('user_input_generate_size')
 
-    threshold = float(user_input_threshold)  # Convert user input to float and use as threshold
-    generate_size = int(user_input_generate_size) # Convert user input to integer and use as generate_size
+    #threshold = float(user_input_threshold)  # Convert user input to float and use as threshold
+    #generate_size = int(user_input_generate_size) # Convert user input to integer and use as generate_size
 
     # Train the model and get predicted probabilities
     vulnerability_model = ml.VulnerabilityModel(df)
-    y_test, y_pred_proba, X_test = vulnerability_model.train_model(threshold)
+    y_test, y_pred_proba, X_test = vulnerability_model.train_model(5)
 
     accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
 
@@ -140,6 +137,7 @@ def submit():
         opacity=0.75,
         name='True Negatives'
     )
+
     trace1 = go.Histogram(
         x=y_pred_proba[y_test == 1],
         opacity=0.75,
@@ -148,20 +146,20 @@ def submit():
 
     data = [trace0, trace1]
 
-    # Generate synthetic data
-    new_data = dp.generate_synthetic_data(df, generate_size)
-
-    # Make predictions on the synthetic data
-    predictions = vulnerability_model.predict(new_data)
-
-    # Create a histogram of the predicted probabilities for the synthetic data
-    trace3 = go.Histogram(
-        x=predictions,
-        opacity=0.75,
-        name='Predictions on synthetic data'
-    )
-
-    data.append(trace3)  # Add the new trace to the data
+    # # Generate synthetic data
+    # new_data = dp.generate_synthetic_data(df, generate_size)
+    #
+    # # Make predictions on the synthetic data
+    # predictions = vulnerability_model.predict(new_data)
+    #
+    # # Create a histogram of the predicted probabilities for the synthetic data
+    # trace3 = go.Histogram(
+    #     x=predictions,
+    #     opacity=0.75,
+    #     name='Predictions on synthetic data'
+    # )
+    #
+    # data.append(trace3)  # Add the new trace to the data
 
     # Convert to JSON
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)

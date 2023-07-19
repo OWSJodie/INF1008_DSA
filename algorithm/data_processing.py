@@ -18,26 +18,6 @@ def load_data(filename):
     return df
 
 
-def convert_xlsx_to_cleaned_csv(filename, file_location):
-    df = pd.read_excel(filename)
-
-    # List of columns you want to modify
-    columns_to_modify = ['Mixed_exploitabilityScore',
-                         'Mixed_impactScore',
-                         'Mixed_baseSeverity',
-                         'Mixed_basedScore']
-
-    # Replace zeros with NaNs in these columns
-    for column in columns_to_modify:
-        df[column].replace(0, np.nan, inplace=True)
-
-    # Replace NaNs with column means in these columns
-    for column in columns_to_modify:
-        df[column].fillna(df[column].mean(), inplace=True)
-
-    df.to_csv(file_location, index=False)
-
-
 def map_words_to_values(df, column_name, mapping):
     """
     Map the words in the specified column to values.
@@ -52,6 +32,31 @@ def map_words_to_values(df, column_name, mapping):
     """
     df[column_name] = df[column_name].map(mapping)
     return df
+
+
+def convert_xlsx_to_cleaned_csv(filename, file_location):
+    df = pd.read_excel(filename)
+
+    df = map_words_to_values(df, 'Mixed_baseSeverity', config.MAPPING)
+
+    # List of columns you want to modify
+    columns_to_modify = ['Mixed_exploitabilityScore',
+                         'Mixed_impactScore',
+                         'Mixed_baseSeverity',
+                         'Mixed_basedScore']
+
+    # Replace non-numeric values with NaN
+    for column in columns_to_modify:
+        df[column] = pd.to_numeric(df[column], errors='coerce')
+
+    # Replace NaNs with column means in these columns
+    for column in columns_to_modify:
+        df[column].fillna(df[column].mean(), inplace=True)
+
+    df.to_csv(file_location, index=False)
+
+
+
 
 
 def calculate_variable_correlations(dataframe, variables_column, list_of_variables):
@@ -262,3 +267,7 @@ def generate_synthetic_data(df,num_samples=100):
     })
 
     return synthetic_data
+
+# file_location = '../dataset/updated_cve_2023_07_09.xlsx'
+# csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
+# convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
