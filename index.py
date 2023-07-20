@@ -1,10 +1,13 @@
 import json
+
+import pandas as pd
 import plotly
 import plotly.graph_objs as go
 from cybernews.cybernews import CyberNews
 from flask import Flask, request, session
 from flask import redirect
 from flask import render_template
+
 import algorithm.config as config
 import algorithm.data_processing as dp
 import algorithm.machine_learning as ml
@@ -102,24 +105,26 @@ def analytics():
 
 @app.route('/plot')
 def plot():
-    graphJSON = session.get('graphJSON')
-
-    return render_template('plot.html', graphJSON=graphJSON)
+    predict_scores =  None
+    return render_template('plot.html',predict_scores=predict_scores)
 
 
 @app.route('/submit', methods=['POST'])
 def submit():
     print("test")
     print(df['Mixed_baseSeverity'].value_counts())
-    #user_input_threshold = request.form.get('user_input_threshold')
-    #user_input_generate_size = request.form.get('user_input_generate_size')
+    # user_input_threshold = request.form.get('user_input_threshold')
+    # user_input_generate_size = request.form.get('user_input_generate_size')
 
-    #threshold = float(user_input_threshold)  # Convert user input to float and use as threshold
-    #generate_size = int(user_input_generate_size) # Convert user input to integer and use as generate_size
+    user_input_basedScore = float(request.form.get('user_input_basedScore'))
+    user_input_exploitabilityScore = float(request.form.get('user_input_exploitabilityScore'))
+    user_input_Mixed_impactScore = float(request.form.get('user_input_Mixed_impactScore'))
+    user_input_obtain_privilege = int(request.form.get('user_input_obtain_privilege'))
+    user_input_userinteraction = int(request.form.get('user_input_userinteraction'))
 
     # Train the model and get predicted probabilities
     vulnerability_model = ml.VulnerabilityModel(df)
-    y_test, y_pred_proba, X_test = vulnerability_model.train_model(5)
+    y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
 
     accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
 
@@ -146,26 +151,23 @@ def submit():
 
     data = [trace0, trace1]
 
-    # # Generate synthetic data
-    # new_data = dp.generate_synthetic_data(df, generate_size)
-    #
-    # # Make predictions on the synthetic data
-    # predictions = vulnerability_model.predict(new_data)
-    #
-    # # Create a histogram of the predicted probabilities for the synthetic data
-    # trace3 = go.Histogram(
-    #     x=predictions,
-    #     opacity=0.75,
-    #     name='Predictions on synthetic data'
-    # )
-    #
-    # data.append(trace3)  # Add the new trace to the data
+    new_data = pd.DataFrame({
+        'Mixed_basedScore': [user_input_basedScore],
+        'Mixed_exploitabilityScore': [user_input_exploitabilityScore],
+        'Mixed_impactScore': [user_input_Mixed_impactScore],
+        'Mixed_obtainPrivilege': [user_input_obtain_privilege],
+        'Mixed_userInteractionRequired': [user_input_userinteraction]
+    })
+
+    predict_scores = vulnerability_model.predict(new_data)
+    predict_scores = (predict_scores[predict_scores == 1].shape[0] / predict_scores.shape[0]) * 100
+
+    accuracy = round(accuracy * 100, 2)
 
     # Convert to JSON
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('plot.html', graphJSON=graphJSON)
-
+    return render_template('plot.html', graphJSON=graphJSON ,predict_scores=predict_scores, accuracy=accuracy)
 
 
 if __name__ == "__main__":

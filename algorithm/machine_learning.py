@@ -18,7 +18,7 @@ class VulnerabilityModel:
         features = ['Mixed_basedScore', 'Mixed_exploitabilityScore', 'Mixed_impactScore', "Mixed_obtainPrivilege",
                     "Mixed_userInteractionRequired"]
         X = self.data[features]
-        y = pd.to_numeric(self.data['Mixed_baseSeverity'], errors='coerce') > threshold
+        y = pd.to_numeric(self.data['Mixed_baseSeverity'], errors='coerce') >= threshold
         severity_counts = self.data['Mixed_baseSeverity'].value_counts()
         print("this is severity_counts: ")
         print(severity_counts)

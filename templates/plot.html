@@ -4,12 +4,12 @@
 <head>
     <!-- Meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="static/css/style.css">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
+    <link href="static/css/style.css" rel="stylesheet">
 
     <title>RansomX</title>
 </head>
@@ -17,7 +17,7 @@
 <body>
 <!-- Top Navigation Bar -->
 <nav class="navbar navbar-expand-sm">
-    <img class="navbar-brand" src="../static/images/image.jpg" width="25px" alt="">
+    <img alt="" class="navbar-brand" src="../static/images/image.jpg" width="25px">
     RansomX
     <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
@@ -43,18 +43,48 @@
 <div class="container">
     Prediction
     <div class="row">
-        <div class="col-4">
+        <div class="col">
             <form action="/submit" method="POST">
-                <input type="text" name="user_input_top_vul" placeholder="Enter your text here">
-                <input type="text" name="user_input_generate_size" placeholder="Enter your text here">
-                <input type="submit" value="Submit">
+                <div class="row">
+                    <div class=" col-12 d-flex justify-content-between">
+                        <text>Base Score:</text>
+                        <input max="10" min="0" name="user_input_basedScore" placeholder=""
+                               type="number" style = "width:50px"></div>
+                    <div class=" col-12 d-flex justify-content-between">
+                        <text>Exploitability Score:</text>
+                        <input max="10" min="0" name="user_input_exploitabilityScore" placeholder=""
+                               type="number" style = "width:50px"></div>
+                    <div class=" col-12 d-flex justify-content-between">
+                        <text>Impact Score:</text>
+                        <input max="10" min="0" name="user_input_Mixed_impactScore" placeholder=""
+                               type="number" style = "width:50px"></div>
+                    <div class=" col-12 d-flex justify-content-between">
+                        <text>Obtain Privilege:</text>
+                        <input max="1" min="0" name="user_input_obtain_privilege" placeholder=""
+                               type="number" style = "width:50px"></div>
+                    <div class=" col-12 d-flex justify-content-between " >
+                        <text>User Interaction:</text>
+                        <input max="1" min="0" name="user_input_userinteraction" placeholder=""
+                               type="number" style = "width:50px"></div>
+                    <div class=" col-12 "><input type="submit" value="Submit"></div>
+                </div>
             </form>
         </div>
-        <div class="col-8">
-            2 of 3 (wider)
+        <div class="col">
+            {% if predict_scores is not none %}
+            {% if predict_scores %}
+            <p>We predict this is High risk severity</p>
+            {% else %}
+            <p>We predict this is None to Low risk severity</p>
+            {% endif %}
+            <p>With an accuracy of {{accuracy}}%</p>
+            {% else %}
+            <p>No prediction scores available.</p>
+            {% endif %}
+
         </div>
     </div>
-        <div class= "mt-1" id="plot"></div>
+    <div class="mt-1" id="plot"></div>
 </div>
 
 
@@ -64,6 +94,7 @@
 <script>
         var graph = {{ graphJSON | safe }};
         Plotly.newPlot('plot', graph, {responsive: true});
+
 
 
 </script>
