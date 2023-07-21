@@ -10,6 +10,7 @@ from flask import render_template
 import algorithm.config as config
 import algorithm.data_processing as dp
 import algorithm.machine_learning as ml
+import algorithm.RansomwareAttackByIndustryGraph as hk
 
 import plotly.io as pio
 
@@ -40,7 +41,11 @@ def index():
 
 @app.route('/resources')
 def resources():
-    return render_template('resources.html')
+    # Save the plot as an image file
+    image_path = 'static/images/hk.png'
+    hk.run().savefig(image_path)
+
+    return render_template('resources.html', image_path=image_path)
 
 
 @app.route('/about')
