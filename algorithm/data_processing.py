@@ -279,6 +279,71 @@ def generate_synthetic_data(df, num_samples=100):
 
     return synthetic_data
 
+def analyze_attack_types_time_series(df, frequency='month'):
+    """
+    Analyze the time series of each unique individual attack.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+    - frequency (str): The frequency of the time series, either 'month' or 'year'.
+
+    Returns:
+    - traces (list): A list of Plotly line traces for each unique individual attack.
+    """
+
+    # Convert the 'cve_published_date' column to the appropriate date format
+    df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format='%d/%m/%Y')
+
+    # Function to clean the attack_type values and extract individual attack types
+    def clean_attack_types(types):
+        if isinstance(types, str):
+            types_list = ast.literal_eval(types)
+            cleaned_types = [t.strip('[]\'"') for t in types_list]
+            return cleaned_types
+        else:
+            return []
+
+    # Clean the 'attack_type' column and create a new column with cleaned attack types
+    df['cleaned_attack_type'] = df['attack_type'].apply(clean_attack_types)
+
+    # Get unique attack types and concatenate them into a single set
+    unique_attack_types_set = set()
+    _ = df['cleaned_attack_type'].apply(lambda x: unique_attack_types_set.update(x))
+
+    # Create a list of lin  e traces
+    traces = []
+
+    # Create a trace for each unique attack type and add it to the traces list
+    for attack_type in unique_attack_types_set:
+        df_filtered = df[df['cleaned_attack_type'].apply(lambda x: attack_type in x)]
+        if frequency == 'month':
+            time_series = df_filtered.groupby(pd.Grouper(key='cve_published_date', freq='M')).size()
+        elif frequency == 'year':
+            time_series = df_filtered.groupby(pd.Grouper(key='cve_published_date', freq='Y')).size()
+        else:
+            raise ValueError("Invalid frequency parameter. Use 'month' or 'year'.")
+
+        trace = go.Scatter(
+            x=time_series.index,
+            y=time_series.values,
+            mode='lines',
+            name=attack_type
+        )
+        traces.append(trace)
+
+        layout = go.Layout(
+            title='Number of Vulnerabilities over Time',
+            xaxis=dict(title='Date', automargin=True),
+            yaxis=dict(title='Number of Vulnerabilities', automargin=True),
+            showlegend=True,
+        )
+
+        # Create the figure
+        fig = go.Figure(data=traces, layout=layout)
+
+
+    return fig
+
 def analyze_attack_types_by_vendor(df):
     """
     Analyze the attack types by vendor.
@@ -397,4 +462,5 @@ def plot_ransomware_attacks(result):
 # file_location = '../dataset/updated_cve_2023_07_09.xlsx'
 # csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
 # convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
+
 
