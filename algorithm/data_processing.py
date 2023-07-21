@@ -1,6 +1,11 @@
+import ast
+
 import pandas as pd
 import numpy as np
+from collections import Counter
 import algorithm.config as config
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 def load_data(filename):
@@ -56,7 +61,9 @@ def convert_xlsx_to_cleaned_csv(filename, file_location):
     df.to_csv(file_location, index=False)
 
 
-
+def convert_xlsx_to_csv(filename, file_location):
+    df = pd.read_excel(filename)
+    df.to_csv(file_location, index=False)
 
 
 def calculate_variable_correlations(dataframe, variables_column, list_of_variables):
@@ -258,7 +265,7 @@ def store_vulnerabilities_in_dict(df, vulnerability_column, year):
     return vulnerability_dict
 
 
-def generate_synthetic_data(df,num_samples=100):
+def generate_synthetic_data(df, num_samples=100):
     # Generate synthetic data
     synthetic_data = pd.DataFrame({
         'Mixed_basedScore': np.random.choice(df['Mixed_basedScore'], num_samples),
@@ -268,6 +275,117 @@ def generate_synthetic_data(df,num_samples=100):
 
     return synthetic_data
 
-# file_location = '../dataset/updated_cve_2023_07_09.xlsx'
-# csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
-# convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
+def analyze_attack_types_by_vendor(df):
+    """
+    Analyze the attack types by vendor.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+
+    Returns:
+    - fig (plotly.graph_objects.Figure): The figure containing the plot.
+    """
+
+    # Convert the 'cve_published_date' column to the appropriate date format
+    df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format='%d/%m/%Y')
+
+    # Function to clean the attack_type values and extract individual attack types
+    def clean_attack_types(types):
+        if isinstance(types, str):
+            types_list = ast.literal_eval(types)
+            cleaned_types = [t.strip('[]\'"') for t in types_list]
+            return cleaned_types
+        else:
+            return []
+
+    # Clean the 'attack_type' column and create a new column with cleaned attack types
+    df['cleaned_attack_type'] = df['attack_type'].apply(clean_attack_types)
+
+    # Get unique attack types and concatenate them into a single set
+    unique_attack_types_set = set()
+    _ = df['cleaned_attack_type'].apply(lambda x: unique_attack_types_set.update(x))
+
+    # Get unique vendors
+    unique_vendors = df['vendor'].unique()
+
+    # Create the layout
+    layout = go.Layout(
+        title='CVEs Time Series for Different Attacks by Vendor',
+        xaxis=dict(title='Date', automargin=True),
+        yaxis=dict(title='Vendor', automargin=True),
+        showlegend=True,
+    )
+
+    # Create the figure
+    fig = go.Figure(layout=layout)
+
+    # Create a trace for each unique attack type and add it to the figure
+    for attack_type in unique_attack_types_set:
+        df_filtered = df[df['cleaned_attack_type'].apply(lambda x: attack_type in x)]
+        fig.add_trace(go.Scatter(
+            x=df_filtered['cve_published_date'],
+            y=df_filtered['vendor'],
+            mode='markers',
+            marker=dict(size=8, opacity=0.7),
+            name=attack_type
+        ))
+
+    # Return the figure
+    return fig
+
+
+
+# file_location = '../dataset/vulnerabilities.csv'
+# # csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
+# # convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
+#
+# df = load_data(file_location)
+#
+# # Assuming you already have the DataFrame 'df' with the data loaded.
+#
+# # Convert the 'cve_published_date' column to the appropriate date format
+# df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format='%d/%m/%Y')
+#
+# # Function to clean the attack_type values and extract individual attack types
+# def clean_attack_types(types):
+#     if isinstance(types, str):
+#         types_list = ast.literal_eval(types)
+#         cleaned_types = [t.strip('[]\'"') for t in types_list]
+#         return cleaned_types
+#     else:
+#         return []
+#
+# # Clean the 'attack_type' column and create a new column with cleaned attack types
+# df['cleaned_attack_type'] = df['attack_type'].apply(clean_attack_types)
+#
+# # Get unique attack types and concatenate them into a single set
+# unique_attack_types_set = set()
+# _ = df['cleaned_attack_type'].apply(lambda x: unique_attack_types_set.update(x))
+#
+# # Get unique vendors
+# unique_vendors = df['vendor'].unique()
+#
+# # Create the layout
+# layout = go.Layout(
+#     title='CVEs Time Series for Different Attacks by Vendor',
+#     xaxis=dict(title='Date'),
+#     yaxis=dict(title='Vendor'),
+#     showlegend=True,
+# )
+#
+# # Create the figure
+# fig = go.Figure(layout=layout)
+#
+# # Create a trace for each unique attack type and add it to the figure
+# for attack_type in unique_attack_types_set:
+#     df_filtered = df[df['cleaned_attack_type'].apply(lambda x: attack_type in x)]
+#     fig.add_trace(go.Scatter(
+#         x=df_filtered['cve_published_date'],
+#         y=df_filtered['vendor'],
+#         mode='markers',
+#         marker=dict(size=8, opacity=0.7),
+#         name=attack_type
+#     ))
+#
+# # Show the figure
+# fig.show()

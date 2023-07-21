@@ -101,15 +101,10 @@
 </body>
 
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script type='text/javascript'>
-    var traces = {{ graphJSON | safe}};
-    var layout = {
-        title: 'Number of Vulnerabilities Over Time',
-        xaxis: { title: 'Date' },
-        yaxis: { title: 'Number of Vulnerabilities' }
-    };
-    Plotly.newPlot('chart', traces, layout, {responsive: true});
-
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script>
+        var graph = {{ graphJSON | safe }};
+        Plotly.newPlot('plot', graph, {responsive: true});
 </script>
 
 </html>

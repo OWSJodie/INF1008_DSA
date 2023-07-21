@@ -4,7 +4,7 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 from cybernews.cybernews import CyberNews
-from flask import Flask, request, session
+from flask import Flask, request
 from flask import redirect
 from flask import render_template
 
@@ -14,11 +14,13 @@ import algorithm.machine_learning as ml
 
 app = Flask(__name__)
 
-file_location = 'dataset/updated_cve_2023_07_09.csv'
+train_model_file_location = 'dataset/updated_cve_2023_07_09.csv'
+analysis_file_location = 'dataset/vulnerabilities.csv'
 
 MAPPING, THRESHOLD, VARIABLES_OF_INTEREST = config.MAPPING, config.THRESHOLD, config.VARIABLES_OF_INTEREST
 
-df = dp.load_data(file_location)
+df = dp.load_data(train_model_file_location)
+df_analysis = dp.load_data(analysis_file_location)
 
 filtered_df = df.dropna(subset=VARIABLES_OF_INTEREST, how='all')
 
@@ -97,10 +99,14 @@ def analytics():
         )
         traces.append(trace)
 
+    fig = dp.analyze_attack_types_by_vendor(df_analysis)
+    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
     # Convert to JSON
     graphJSON = json.dumps(traces, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('analytics.html', graphJSON=graphJSON)
+    return render_template('analytics.html', graphJSON=graphJSON , graphJSON2=graphJSON2)
 
 
 @app.route('/predict')
