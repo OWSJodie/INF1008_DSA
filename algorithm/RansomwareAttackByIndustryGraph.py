@@ -36,10 +36,10 @@ def run():
     node_colors = ["green" if node in industry_nodes else "red" for node in G.nodes]
 
     # Compute layout
-    pos = nx.kamada_kawai_layout(G, scale=50)
+    pos = nx.kamada_kawai_layout(G, scale=100)
 
     # Draw the graph
-    plt.figure(figsize=(100, 100), dpi= 50)  # adjust as necessary
+    plt.figure(figsize=(20, 20), dpi= 100)  # adjust as necessary
     plt.title("Industry Targeted by Each Ransomware Attacks", fontsize=20, fontweight=0, color='purple', loc='center', style='italic')
 
     nx.draw_networkx_edges(G, pos, alpha=0.4, width=edge_widths)  # draw edges with a bit of transparency and width based on frequency
@@ -56,4 +56,4 @@ def run():
     return plt
 
 
-# run().show()
+#run().show()
