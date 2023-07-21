@@ -103,18 +103,14 @@ def analytics():
     return render_template('analytics.html', graphJSON=graphJSON)
 
 
-@app.route('/plot')
+@app.route('/predict')
 def plot():
     predict_scores =  None
-    return render_template('plot.html',predict_scores=predict_scores)
+    return render_template('predict.html',predict_scores=predict_scores)
 
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    print("test")
-    print(df['Mixed_baseSeverity'].value_counts())
-    # user_input_threshold = request.form.get('user_input_threshold')
-    # user_input_generate_size = request.form.get('user_input_generate_size')
 
     user_input_basedScore = float(request.form.get('user_input_basedScore'))
     user_input_exploitabilityScore = float(request.form.get('user_input_exploitabilityScore'))
@@ -167,7 +163,7 @@ def submit():
     # Convert to JSON
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('plot.html', graphJSON=graphJSON ,predict_scores=predict_scores, accuracy=accuracy)
+    return render_template('predict.html', graphJSON=graphJSON ,predict_scores=predict_scores, accuracy=accuracy)
 
 
 if __name__ == "__main__":
