@@ -89,26 +89,10 @@ def vendors():
 
 @app.route('/vulnerabilities')
 def vulnerabilities():
-    global analysis_results
-
-    # Perform analysis if results are not available
-    if analysis_results is None:
-        vulnerability_dict = dp.store_vulnerabilities_in_dict(filtered_df, 'vulnerability', True)
-        analysis_results = vulnerability_dict
-
-    # Create a list of line traces
-    traces = []
-    for vulnerability, df in analysis_results.items():
-        trace = go.Scatter(
-            x=df['cve.published'],
-            y=df['Number_of_Vulnerabilities'],
-            mode='lines',
-            name=vulnerability
-        )
-        traces.append(trace)
+    fig_yearly = dp.analyze_attack_types_time_series(df_analysis, frequency='year')
 
     # Convert to JSON
-    graphJSON = json.dumps(traces, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON = fig_yearly.to_json()
 
     return render_template('vulnerabilities.html', graphJSON=graphJSON)
 
@@ -126,6 +110,19 @@ def ransomware_attacks():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder) # Convert the graph to JSON
 
     return render_template('Ransomware.html', graphJSON=graphJSON)
+
+
+# @app.route('/analytics')
+# def analytics():
+#     # Create a list of line traces for yearly time series
+#     fig_yearly = dp.analyze_attack_types_time_series(df_analysis, frequency='year')
+#     fig = dp.analyze_attack_types_by_vendor(df_analysis)
+#
+#     graphJSON_vendor = fig.to_json()
+#     graphJSON_yearly = fig_yearly.to_json()
+#
+#
+#     return render_template('analytics.html', graphJSON=graphJSON_vendor , graphJSON2=graphJSON_yearly)
 
 
 @app.route('/predict')
@@ -184,6 +181,7 @@ def submit():
     predict_scores = (predict_scores[predict_scores == 1].shape[0] / predict_scores.shape[0]) * 100
 
     accuracy = round(accuracy * 100, 2)
+
 
     # Convert to JSON
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
