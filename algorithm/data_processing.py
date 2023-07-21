@@ -6,6 +6,10 @@ from collections import Counter
 import algorithm.config as config
 import plotly.express as px
 import plotly.graph_objects as go
+import csv
+import algorithm.config as config
+import plotly.graph_objs as go
+import plotly.io as pio
 
 
 def load_data(filename):
@@ -333,59 +337,64 @@ def analyze_attack_types_by_vendor(df):
     # Return the figure
     return fig
 
+def count_countries_by_year_range(filename, start_year, end_year):
+    with open(filename, 'r', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        header = next(reader)  # Read the header row
 
 
-# file_location = '../dataset/vulnerabilities.csv'
-# # csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
-# # convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
-#
-# df = load_data(file_location)
-#
-# # Assuming you already have the DataFrame 'df' with the data loaded.
-#
-# # Convert the 'cve_published_date' column to the appropriate date format
-# df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format='%d/%m/%Y')
-#
-# # Function to clean the attack_type values and extract individual attack types
-# def clean_attack_types(types):
-#     if isinstance(types, str):
-#         types_list = ast.literal_eval(types)
-#         cleaned_types = [t.strip('[]\'"') for t in types_list]
-#         return cleaned_types
-#     else:
-#         return []
-#
-# # Clean the 'attack_type' column and create a new column with cleaned attack types
-# df['cleaned_attack_type'] = df['attack_type'].apply(clean_attack_types)
-#
-# # Get unique attack types and concatenate them into a single set
-# unique_attack_types_set = set()
-# _ = df['cleaned_attack_type'].apply(lambda x: unique_attack_types_set.update(x))
-#
-# # Get unique vendors
-# unique_vendors = df['vendor'].unique()
-#
-# # Create the layout
-# layout = go.Layout(
-#     title='CVEs Time Series for Different Attacks by Vendor',
-#     xaxis=dict(title='Date'),
-#     yaxis=dict(title='Vendor'),
-#     showlegend=True,
-# )
-#
-# # Create the figure
-# fig = go.Figure(layout=layout)
-#
-# # Create a trace for each unique attack type and add it to the figure
-# for attack_type in unique_attack_types_set:
-#     df_filtered = df[df['cleaned_attack_type'].apply(lambda x: attack_type in x)]
-#     fig.add_trace(go.Scatter(
-#         x=df_filtered['cve_published_date'],
-#         y=df_filtered['vendor'],
-#         mode='markers',
-#         marker=dict(size=8, opacity=0.7),
-#         name=attack_type
-#     ))
-#
-# # Show the figure
-# fig.show()
+        date_index = header.index('Year')
+        country_index = header.index('Country')
+
+        year_country_counts = {}
+
+        for row in reader:
+            date = row[date_index]
+            year = date.split('-')[0]  # Extract the year from the date
+
+            if start_year <= year <= end_year:
+                country = row[country_index]
+                if year in year_country_counts:
+                    if country in year_country_counts[year]:
+                        year_country_counts[year][country] += 1
+                    else:
+                        year_country_counts[year][country] = 1
+                else:
+                    year_country_counts[year] = {country: 1}
+
+        return year_country_counts
+
+def plot_ransomware_attacks(result):
+    # Convert the result into a DataFrame
+    df = pd.DataFrame(result).T
+    df_sorted = df.sort_index(ascending=False)
+
+    # Create a plotly figure
+    fig = go.Figure()
+
+    # Add a bar for each country
+    for country in df_sorted.columns:
+        fig.add_trace(
+            go.Bar(
+                x=df_sorted.index,
+                y=df_sorted[country],
+                name=country
+            )
+        )
+
+    # Update layout
+    fig.update_layout(
+        title="Ransomware Attacks over the Years by Countries",
+        xaxis_title="Year",
+        yaxis_title="Number of Ransomware Attacks",
+        barmode='stack'
+    )
+
+    # Show the figure
+    return fig
+
+
+# file_location = '../dataset/updated_cve_2023_07_09.xlsx'
+# csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
+# convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
+

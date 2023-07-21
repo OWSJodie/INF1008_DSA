@@ -1,5 +1,4 @@
 import json
-
 import pandas as pd
 import plotly
 import plotly.graph_objs as go
@@ -24,9 +23,12 @@ df_analysis = dp.load_data(analysis_file_location)
 
 filtered_df = df.dropna(subset=VARIABLES_OF_INTEREST, how='all')
 
+
+
 # Store analysis results globally
 global analysis_results
 analysis_results = None
+
 
 
 @app.route('/')
@@ -107,6 +109,20 @@ def analytics():
     graphJSON = json.dumps(traces, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('analytics.html', graphJSON=graphJSON , graphJSON2=graphJSON2)
+
+
+@app.route('/ransomware')
+def ransomware_attacks():
+    filename = 'dataset/Full_FYP_crawled_edit.csv'
+    start_year = '2000'
+    end_year = '2021'
+
+    year_country_counts = dp.count_countries_by_year_range(filename, start_year, end_year)
+    fig = dp.plot_ransomware_attacks(year_country_counts)
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('Ransomware.html', graphJSON=graphJSON)
 
 
 @app.route('/predict')

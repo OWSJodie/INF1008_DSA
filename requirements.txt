@@ -9,3 +9,4 @@ cybernews~=1.1.2
 scikit-learn~=1.3.0
 joblib~=1.3.1
 numpy~=1.25.1
+matplotlib~=3.7.2
