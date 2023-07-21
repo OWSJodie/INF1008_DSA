@@ -11,6 +11,8 @@ import algorithm.config as config
 import algorithm.data_processing as dp
 import algorithm.machine_learning as ml
 
+import plotly.io as pio
+
 app = Flask(__name__)
 
 train_model_file_location = 'dataset/updated_cve_2023_07_09.csv'
@@ -78,11 +80,15 @@ def cyber_attack_news():
     return render_template('cyber_attack_news.html', news=news)
 
 
-# Add more routes for other news categories
+@app.route('/vendors')
+def vendors():
+    fig = dp.analyze_attack_types_by_vendor(df_analysis)
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+    return render_template('vendors.html', graphJSON=graphJSON)
 
-@app.route('/analytics')
-def analytics():
+@app.route('/vulnerabilities')
+def vulnerabilities():
     global analysis_results
 
     # Perform analysis if results are not available
@@ -101,26 +107,23 @@ def analytics():
         )
         traces.append(trace)
 
-    fig = dp.analyze_attack_types_by_vendor(df_analysis)
-    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-
     # Convert to JSON
     graphJSON = json.dumps(traces, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('analytics.html', graphJSON=graphJSON , graphJSON2=graphJSON2)
+    return render_template('vulnerabilities.html', graphJSON=graphJSON)
 
 
 @app.route('/ransomware')
 def ransomware_attacks():
-    filename = 'dataset/Full_FYP_crawled_edit.csv'
+    filename = 'Dataset/Full_FYP_crawled_edit.csv'
     start_year = '2000'
     end_year = '2021'
 
     year_country_counts = dp.count_countries_by_year_range(filename, start_year, end_year)
     fig = dp.plot_ransomware_attacks(year_country_counts)
+    # pio.show(fig)
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder) # Convert the graph to JSON
 
     return render_template('Ransomware.html', graphJSON=graphJSON)
 
