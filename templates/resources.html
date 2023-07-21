@@ -14,7 +14,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <style>
         body {
             background-color: black;
@@ -51,13 +50,14 @@
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <div class="dropdown">
-                        <button class="btn btn-link text-muted" style="text-decoration: none" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        Analytics
+                        <button class="btn btn-link text-muted" style="text-decoration: none" type="button"
+                            id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Analytics
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li><a class="dropdown-item" href="ransomware">Ransomware</a></li>
-                        <li><a class="dropdown-item" href="vendors">Vendors</a></li>
-                        <li><a class="dropdown-item" href="vulnerabilities">Vulnerabilities</a></li>
+                            <li><a class="dropdown-item" href="ransomware">Ransomware</a></li>
+                            <li><a class="dropdown-item" href="vendors">Vendors</a></li>
+                            <li><a class="dropdown-item" href="vulnerabilities">Vulnerabilities</a></li>
                         </ul>
                     </div>
                 <li class="nav-item">
@@ -68,8 +68,9 @@
                 </li>
                 <li class="nav-item">
                     <div class="dropdown">
-                        <button class="btn btn-link text-muted" style="text-decoration: none" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        News
+                        <button class="btn btn-link text-muted" style="text-decoration: none" type="button"
+                            id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            News
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                             <li><a class="dropdown-item" href="news/general">General News</a></li>
@@ -83,31 +84,76 @@
     </nav>
     <hr class="bg-secondary mx-3 mt-0">
 
-    
+
     <!-- Page Content -->
     <div class="container">
         <h1>Ransomware Attacks and Counter Measures</h1>
 
         <div class="section">
             <div>
-                <img src="{{ image_path }}" alt="Matplotlib Graph" style="width: 100%; height: auto;>
+                <img src="{{ image_path }}" alt="Matplotlib Graph" style="width: 100%; height: auto;"
+                    usemap="#imageMap">
+                <map name="imageMap">
+                    <!-- Define clickable regions (coordinates are relative to the image size) -->
+                    <area shape="rect" coords="10,10,100,100" href="#" onclick="showDetails('Region 1')">
+                    <area shape="circle" coords="150,100,50" href="#" onclick="showDetails('Region 2')">
+                    <area shape="poly" coords="200,50,250,80,280,20" href="#" onclick="showDetails('Region 3')">
+                    <!-- Add more clickable regions as needed -->
+                </map>
             </div>
-        
+            <p>
             <h2>Common Ransomware Attacks</h2>
-            <ul class="list-group">
-                <li class="list-group-item">WannaCry</li>
-                <li class="list-group-item">Petya</li>
-                <li class="list-group-item">Locky</li>
-                <li class="list-group-item">CryptoLocker</li>
-                <li class="list-group-item">Ryuk</li>
-                <li class="list-group-item">SamSam</li>
-            </ul>
+            RansomX provides information about various ransomware attacks. Some of the commonly known ransomware
+            attacks include WannaCry, Petya, Locky, CryptoLocker, Ryuk, and SamSam.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>Details of Common Ransomware Attacks</h2>
+            <p>
+                <strong>WannaCry:</strong>
+                WannaCry is a highly notorious ransomware that emerged in May 2017. It leveraged a vulnerability in
+                Windows operating systems known as EternalBlue to rapidly spread across networks. The attack affected
+                hundreds of thousands of computers in more than 150 countries, including organizations like hospitals,
+                businesses, and government agencies. WannaCry encrypted victims' files and demanded ransom payments in
+                Bitcoin to provide decryption keys. It caused massive disruption and financial losses, highlighting the
+                importance of keeping software up to date and implementing robust cybersecurity measures.
+            </p>
+
+            <p>
+                <strong>Petya (NotPetya):</strong>
+                Petya, also known as NotPetya, appeared in June 2017 and caused widespread damage. Like WannaCry, Petya
+                exploited the EternalBlue vulnerability to propagate rapidly. However, it was not a traditional
+                ransomware in the sense that its encryption mechanism was flawed, making file recovery nearly
+                impossible. Instead of being driven by financial motives, Petya's primary goal appeared to be
+                disruption, particularly targeting organizations in Ukraine and various sectors globally. Petya raised
+                concerns about the potential involvement of nation-state actors in cyberattacks.
+            </p>
+
+            <p>
+                <strong>Locky:</strong>
+                Locky is a well-known ransomware that first emerged in early 2016. It predominantly spread via email
+                attachments, especially in malicious Microsoft Word documents. Upon execution, Locky encrypted files on
+                the victim's computer and demanded a ransom for decryption. Locky's distribution was widespread,
+                impacting numerous individuals and businesses worldwide.
+            </p>
+
+            <p>
+                <strong>CryptoLocker:</strong>
+                CryptoLocker was one of the earliest and most significant ransomware variants, observed around September
+                2013. It commonly propagated through malicious email attachments, encrypting victims' files with strong
+                encryption. The ransom demanded by CryptoLocker was typically paid in Bitcoin or other cryptocurrencies.
+                CryptoLocker significantly impacted users, leading to increased awareness of ransomware threats.
+            </p>
         </div>
 
         <div class="section">
             <h2>Counter Measures</h2>
+            <p>
+                RansomX suggests the following counter measures to protect against ransomware attacks:
+            </p>
             <ul class="list-group">
-                <li class="list-group-item">Regularly backup your data and keep offline backups</li>
+                <li class="list-group-item">Regularly backup your data and keep offline backups.</li>
                 <li class="list-group-item">Use reliable and up-to-date antivirus/anti-malware software.</li>
                 <li class="list-group-item">Keep your operating system and software up to date with the latest security
                     patches.</li>
@@ -123,5 +169,11 @@
     </div>
 
 </body>
+<script>
+    function showDetails(region) {
+        // Replace this with your desired action, e.g., showing details in a tooltip or popup
+        alert('Details for ' + region);
+    }
+</script>
 
 </html>
