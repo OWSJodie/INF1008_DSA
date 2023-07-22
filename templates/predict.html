@@ -18,13 +18,27 @@
 </head>
 
 <style>
+    /* Custom CSS styles */
     table {
         color: white; /* Set the text color for the entire table to white */
     }
+
+    /* Set the text color for table header cells (th elements) to white */
+    th {
+        color: white;
+    }
+
     td {
         color: white;
     }
+
+    /* Set the maximum height for the table container and add overflow-y scroll for scrolling */
+    .table-container {
+        max-height: 300px; /* Adjust the height as per your requirements */
+        overflow-y: auto;
+    }
 </style>
+
 
 <body>
 <!-- Top Navigation Bar -->
@@ -78,23 +92,23 @@
                     <div class=" col-12 d-flex justify-content-between">
                         <text>Base Score:</text>
                         <input max="10" min="0" name="user_input_basedScore" placeholder=""
-                               type="number" style = "width:50px"></div>
+                               type="number" required style = "width:50px"></div>
                     <div class=" col-12 d-flex justify-content-between">
                         <text>Exploitability Score:</text>
-                        <input max="10" min="0" name="user_input_exploitabilityScore" placeholder=""
+                        <input max="10" min="0" required name="user_input_exploitabilityScore" placeholder=""
                                type="number" style = "width:50px"></div>
                     <div class=" col-12 d-flex justify-content-between">
                         <text>Impact Score:</text>
                         <input max="10" min="0" name="user_input_Mixed_impactScore" placeholder=""
-                               type="number" style = "width:50px"></div>
+                               type="number" required style = "width:50px"></div>
                     <div class=" col-12 d-flex justify-content-between">
                         <text>Obtain Privilege:</text>
                         <input max="1" min="0" name="user_input_obtain_privilege" placeholder=""
-                               type="number" style = "width:50px"></div>
+                               type="number" required style = "width:50px"></div>
                     <div class=" col-12 d-flex justify-content-between " >
                         <text>User Interaction:</text>
                         <input max="1" min="0" name="user_input_userinteraction" placeholder=""
-                               type="number" style = "width:50px"></div>
+                               type="number" required style = "width:50px"></div>
                     <div class=" col-12 "><input type="submit" value="Submit"></div>
                 </div>
             </form>
@@ -121,12 +135,12 @@
 
             <form action="/generate" method="POST">
                 <div class="col d-flex justify-content-center"><text class="mr-3">Generate prediction data, Numbers:</text><input min="0" name="user_generate" placeholder=""
-                   type="number" style = "width:200px"><input type="submit" value="Submit"></div>
+                   type="number" required style = "width:200px"><input type="submit" value="Generate"></div>
             </form>
 
             {% if synthetic_data is not none %}
             <h3>Prediction Results</h3>
-            <div class="table-responsive">
+            <div class="table-responsive table-container mb-5">
                 <table class="table table-bordered">
                     <thead class="thead-dark">
                         <tr>
