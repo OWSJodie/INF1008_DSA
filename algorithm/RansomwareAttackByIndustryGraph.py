@@ -6,6 +6,17 @@ import numpy as np
 file = "Dataset/Copy of Ransomware Attacks.xlsx"
 
 def run():
+
+    """
+    Generate a network graph to show the connections between industries and ransomware attacks.
+
+    Parameters:
+    - file (str): The path to the Excel file containing industry and ransomware data.
+
+    Returns:
+    - plt (matplotlib.pyplot): The matplotlib figure showing the network graph.
+    """
+
     G = nx.Graph()
     ransomware_industry = []
     industry_nodes = set()

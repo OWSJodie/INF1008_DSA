@@ -10,7 +10,7 @@ from flask import render_template
 import algorithm.config as config
 import algorithm.data_processing as dp
 import algorithm.machine_learning as ml
-import algorithm.RansomwareAttackByIndustryGraph as hk
+import algorithm.RansomwareAttackByIndustryGraph as RansonwareAttackGraph
 
 import plotly.io as pio
 
@@ -42,8 +42,8 @@ def index():
 @app.route('/resources')
 def resources():
     # Save the plot as an image file
-    image_path = 'static/images/hk.png'
-    hk.run().savefig(image_path)
+    image_path = 'static/images/RansonwareAttackGraph.png'
+    RansonwareAttackGraph.run().savefig(image_path)
 
     return render_template('resources.html', image_path=image_path)
 
@@ -126,20 +126,6 @@ def ransomware_attacks():
 
     return render_template('Ransomware.html', graphJSON=graphJSON)
 
-
-# @app.route('/analytics')
-# def analytics():
-#     # Create a list of line traces for yearly time series
-#     fig_yearly = dp.analyze_attack_types_time_series(df_analysis, frequency='year')
-#     fig = dp.analyze_attack_types_by_vendor(df_analysis)
-#
-#     graphJSON_vendor = fig.to_json()
-#     graphJSON_yearly = fig_yearly.to_json()
-#
-#
-#     return render_template('analytics.html', graphJSON=graphJSON_vendor , graphJSON2=graphJSON_yearly)
-
-
 @app.route('/predict')
 def plot():
     predict_scores =  None
@@ -196,7 +182,6 @@ def submit():
     predict_scores = (predict_scores[predict_scores == 1].shape[0] / predict_scores.shape[0]) * 100
 
     accuracy = round(accuracy * 100, 2)
-
 
     # Convert to JSON
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)

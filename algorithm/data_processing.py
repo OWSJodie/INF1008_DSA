@@ -44,8 +44,16 @@ def map_words_to_values(df, column_name, mapping):
 
 
 def convert_xlsx_to_cleaned_csv(filename, file_location):
-    df = pd.read_excel(filename)
+    """
+       Convert an Excel file to a cleaned CSV file.
 
+       Parameters:
+       - filename (str): The path to the input Excel file.
+       - file_location (str): The path to save the cleaned CSV file.
+       """
+
+    df = pd.read_excel(filename)
+    # Map the words to values based on the provided mapping
     df = map_words_to_values(df, 'Mixed_baseSeverity', config.MAPPING)
 
     # List of columns you want to modify
@@ -66,208 +74,16 @@ def convert_xlsx_to_cleaned_csv(filename, file_location):
 
 
 def convert_xlsx_to_csv(filename, file_location):
+    """
+       Convert an Excel file to a CSV file.
+
+       Parameters:
+       - filename (str): The path to the input Excel file.
+       - file_location (str): The path to save the CSV file.
+       """
+
     df = pd.read_excel(filename)
     df.to_csv(file_location, index=False)
-
-
-def calculate_variable_correlations(dataframe, variables_column, list_of_variables):
-    """
-    Calculates correlations for each variable separately based on the provided DataFrame.
-
-    Parameters:
-    - dataframe: The input DataFrame containing the data.
-    - variables_column (str): The column name representing the variables.
-    - list_of_variables (list): A list of column names representing the variables of interest.
-
-    Returns:
-    - correlation_results (dict): A dictionary containing the correlation matrices for each variable.
-    """
-    correlation_results = {}
-    variables = dataframe[variables_column].dropna().unique()
-
-    for variable in variables:
-        variable_df = dataframe[dataframe[variables_column] == variable]
-        variable_df = variable_df.dropna(subset=list_of_variables)
-
-        correlations = variable_df[list_of_variables].corr()
-        average_scores = variable_df[list_of_variables].mean()
-        total_num_rows = len(variable_df)
-
-        correlation_results[variable] = {"correlations": correlations,
-                                         "average_scores": average_scores,
-                                         "total_num_rows": total_num_rows}
-
-    return correlation_results
-
-
-def calculate_attack_vector_analysis(df):
-    """
-    Calculate the attack vector analysis based on frequency, mean severity, exploitability score, and impact score.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-
-    Returns:
-    - vulnerability_analysis (pandas.DataFrame): The DataFrame containing the attack vector analysis.
-    """
-    vulnerability_analysis = df.groupby('vulnerability').agg(
-        Frequency=pd.NamedAgg(column='vulnerability', aggfunc='count'),
-        Mean_Severity=pd.NamedAgg(column='Mixed_baseSeverity', aggfunc='mean'),
-        Mean_Exploitability_Score=pd.NamedAgg(column='Mixed_exploitabilityScore', aggfunc='mean'),
-        Mean_Impact_Score=pd.NamedAgg(column='Mixed_impactScore', aggfunc='mean')
-    ).reset_index()
-
-    return vulnerability_analysis
-
-
-def calculate_user_interaction(df, vulnerability_analysis):
-    """
-    Calculate the number of attack vectors that require user interaction.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-    - vulnerability_analysis (pandas.DataFrame): The DataFrame containing the attack vector analysis.
-
-    Returns:
-    - vulnerability_analysis (pandas.DataFrame): The DataFrame containing the updated attack vector analysis.
-    """
-    vulnerability_analysis['User_Interaction_Required'] = \
-        df[df['cve.metrics.cvssMetricV30.cvssData.userInteraction'] == 'REQUIRED'].groupby('vulnerability')[
-            'vulnerability'].count()
-    vulnerability_analysis['User_Interaction_Required'].fillna(0, inplace=True)
-
-    return vulnerability_analysis
-
-
-def get_top_attack_vectors(vulnerability_analysis, top_few):
-    """
-    Get the top attack vectors based on frequency.
-
-    Parameters:
-    - vulnerability_analysis (pandas.DataFrame): The DataFrame containing the attack vector analysis.
-
-    Returns:
-    - top_attack_vectors (pandas.DataFrame): The DataFrame containing the top attack vectors.
-    """
-    top_attack_vectors = vulnerability_analysis.sort_values(by='Frequency', ascending=False).head(top_few)
-
-    return top_attack_vectors
-
-
-def analyze_attack_vectors(df, top_few):
-    """
-    Analyze the attack vectors.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-
-    Returns:
-    - top_attack_vectors (pandas.DataFrame): The DataFrame containing the top attack vectors.
-    """
-    vulnerability_analysis = calculate_attack_vector_analysis(df)
-    vulnerability_analysis = calculate_user_interaction(df, vulnerability_analysis)
-    top_attack_vectors = get_top_attack_vectors(vulnerability_analysis, top_few)
-    top_attack_vectors = top_attack_vectors.reset_index(drop=True)
-
-    return top_attack_vectors
-
-
-def convert_date_column(df, date_column):
-    """
-    Convert the date column to datetime and resample to get the number of vulnerabilities per month.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-    - date_column (str): The name of the date column.
-
-    Returns:
-    - df (pandas.DataFrame): The DataFrame with the date column converted to datetime.
-    """
-    df[date_column] = pd.to_datetime(df[date_column])
-    return df
-
-
-def plot_vulnerabilities_over_time(df, date_column):
-    """
-    Plot the number of vulnerabilities over time.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-    - date_column (str): The name of the date column.
-    """
-    monthly_vulnerabilities = df.resample('M', on=date_column).size()
-    monthly_vulnerabilities.plot()
-
-
-def count_monthly_vulnerabilities(df, date_column, vulnerability_column, specific_vulnerability=None):
-    """
-    Count the number of specific vulnerabilities per month. If a specific vulnerability is provided, only count that vulnerability.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-    - date_column (str): The name of the date column.
-    - vulnerability_column (str): The name of the vulnerability column.
-    - specific_vulnerability (str, optional): The name of a specific vulnerability to count.
-
-    Returns:
-    - monthly_vulnerabilities (pandas.DataFrame): The DataFrame with the number of specific vulnerabilities per month.
-    """
-    df_copy = df.copy()  # create a copy of the dataframe
-    df_copy[date_column] = pd.to_datetime(df_copy[date_column])
-    df_copy.set_index(date_column, inplace=True)
-    if specific_vulnerability is not None:
-        df_copy = df_copy[df_copy[vulnerability_column] == specific_vulnerability]
-    monthly_vulnerabilities = df_copy.groupby([pd.Grouper(freq='M'), vulnerability_column]).size().reset_index()
-    monthly_vulnerabilities.columns = [date_column, vulnerability_column, 'Number_of_Vulnerabilities']
-    return monthly_vulnerabilities
-
-
-def count_yearly_vulnerabilities(df, date_column, vulnerability_column, specific_vulnerability=None):
-    """
-    Count the number of specific vulnerabilities per year. If a specific vulnerability is provided, only count that vulnerability.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-    - date_column (str): The name of the date column.
-    - vulnerability_column (str): The name of the vulnerability column.
-    - specific_vulnerability (str, optional): The name of a specific vulnerability to count.
-
-    Returns:
-    - yearly_vulnerabilities (pandas.DataFrame): The DataFrame with the number of specific vulnerabilities per year.
-    """
-    df_copy = df.copy()  # create a copy of the dataframe
-    df_copy[date_column] = pd.to_datetime(df_copy[date_column])
-    df_copy.set_index(date_column, inplace=True)
-    if specific_vulnerability is not None:
-        df_copy = df_copy[df_copy[vulnerability_column] == specific_vulnerability]
-    yearly_vulnerabilities = df_copy.groupby([pd.Grouper(freq='Y'), vulnerability_column]).size().reset_index()
-    yearly_vulnerabilities.columns = [date_column, vulnerability_column, 'Number_of_Vulnerabilities']
-    return yearly_vulnerabilities
-
-
-def store_vulnerabilities_in_dict(df, vulnerability_column, year):
-    """
-    Store the DataFrame for each unique vulnerability in a dictionary.
-
-    Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data.
-    - vulnerability_column (str): The name of the vulnerability column.
-    - year (boolean): True, data will be sorted by year ,else it will be sorted by month .
-
-    Returns:
-    - vulnerability_dict (dict): A dictionary where the keys are the vulnerability names and the values are the corresponding DataFrames.
-    """
-    vulnerabilities = df[vulnerability_column].dropna().unique()
-    if year:
-        vulnerability_dict = {
-            vulnerability: count_yearly_vulnerabilities(df, 'cve.published', vulnerability_column, vulnerability) for
-            vulnerability in vulnerabilities}
-    else:
-        vulnerability_dict = {
-            vulnerability: count_monthly_vulnerabilities(df, 'cve.published', vulnerability_column, vulnerability) for
-            vulnerability in vulnerabilities}
-    return vulnerability_dict
-
 
 def generate_synthetic_data(df, num_samples=100):
     # Generate synthetic data
@@ -288,7 +104,7 @@ def analyze_attack_types_time_series(df, frequency='month'):
     - frequency (str): The frequency of the time series, either 'month' or 'year'.
 
     Returns:
-    - traces (list): A list of Plotly line traces for each unique individual attack.
+    - fig (plotly.graph_objects.Figure): The figure containing the plot.
     """
 
     # Convert the 'cve_published_date' column to the appropriate date format
@@ -310,7 +126,7 @@ def analyze_attack_types_time_series(df, frequency='month'):
     unique_attack_types_set = set()
     _ = df['cleaned_attack_type'].apply(lambda x: unique_attack_types_set.update(x))
 
-    # Create a list of lin  e traces
+    # Create a list of line traces
     traces = []
 
     # Create a trace for each unique attack type and add it to the traces list
@@ -403,10 +219,21 @@ def analyze_attack_types_by_vendor(df):
     return fig
 
 def count_countries_by_year_range(filename, start_year, end_year):
-    with open(filename, 'r', newline='') as csvfile:
+    """
+    Count the occurrences of countries within a specified year range.
+
+    Parameters:
+    - filename (str): The path to the input CSV file.
+    - start_year (str): The starting year of the range.
+    - end_year (str): The ending year of the range.
+
+    Returns:
+    - year_country_counts (dict): A dictionary containing the counts of countries for each year within the range.
+    """
+
+    with open(filename, 'r', newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)  # Read the header row
-
 
         date_index = header.index('Year')
         country_index = header.index('Country')
@@ -430,6 +257,18 @@ def count_countries_by_year_range(filename, start_year, end_year):
         return year_country_counts
 
 def plot_ransomware_attacks(result):
+
+    """
+    Plot the number of ransomware attacks over the years by countries.
+
+    Parameters:
+    - result (dict): A dictionary containing the counts of ransomware attacks by countries.
+
+    Returns:
+    - fig (plotly.graph_objects.Figure): The figure containing the plot.
+    """
+
+
     # Convert the result into a DataFrame
     df = pd.DataFrame(result).T
     df_sorted = df.sort_index(ascending=False)
@@ -460,6 +299,16 @@ def plot_ransomware_attacks(result):
 
 def top_5_vulnerability_bar_graph(df):
 
+    """
+    Plot the top 5 vulnerability types over the years.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+
+    Returns:
+    - fig (plotly.graph_objects.Figure): The figure containing the plot.
+    """
+
     # Remove rows with missing 'attack_type'
     df = df.dropna(subset=['attack_type'])
 
@@ -483,6 +332,15 @@ def top_5_vulnerability_bar_graph(df):
 
 def top_5_vulnerability_by_vendor(df):
 
+    """
+    Plot the top 5 yearly vulnerabilities by vendor.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data.
+
+    Returns:
+    - fig (plotly.graph_objects.Figure): The figure containing the plot.
+    """
     # Remove rows with missing 'vendor'
     df = df.dropna(subset=['vendor'])
 

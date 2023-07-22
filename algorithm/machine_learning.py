@@ -8,10 +8,32 @@ from os import path
 
 class VulnerabilityModel:
     def __init__(self, data):
+
+        """
+        Initialize the VulnerabilityModel instance.
+
+        Parameters:
+        - data (pandas.DataFrame): The DataFrame containing the vulnerability data.
+        """
+
+
         self.data = data
         self.model = None
 
     def train_model(self, threshold):
+
+        """
+        Train the logistic regression model to predict vulnerability severity.
+
+        Parameters:
+        - threshold (float): The threshold for determining high or low severity.
+
+        Returns:
+        - y_test (pandas.Series): The actual target values for the test set.
+        - y_pred_proba (numpy.ndarray): The predicted probabilities for the test set.
+        - X_test (pandas.DataFrame): The test features used for prediction.
+        """
+
         X_test, y_test = None, None  # Initialize X_test and y_test
 
         # Define the outcome variable
@@ -36,6 +58,17 @@ class VulnerabilityModel:
         return y_test, y_pred_proba, X_test
 
     def predict(self, X):
+
+        """
+        Make predictions using the trained model.
+
+        Parameters:
+        - X (pandas.DataFrame): The features for making predictions.
+
+        Returns:
+        - y_pred (numpy.ndarray): The predicted target values (binary: 0 or 1).
+        """
+
         # Load the trained model from a file if it's not loaded
         if self.model is None:
             self.model = joblib.load('model.pkl')
@@ -45,6 +78,23 @@ class VulnerabilityModel:
         return y_pred
 
     def evaluate_model(self, X_test, y_test):
+
+        """
+        Evaluate the performance of the trained model.
+
+        Parameters:
+        - X_test (pandas.DataFrame): The test features used for evaluation.
+        - y_test (pandas.Series): The actual target values for the test set.
+
+        Returns:
+        - accuracy (float): The accuracy of the model.
+        - confusion (numpy.ndarray): The confusion matrix.
+        - precision (float): The precision score.
+        - recall (float): The recall score.
+        - f1 (float): The F1 score.
+        - auc_roc (float): The area under the ROC curve.
+        """
+
         # Make sure the model is loaded
         if self.model is None:
             self.model = joblib.load('model.pkl')
