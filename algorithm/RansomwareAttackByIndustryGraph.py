@@ -3,7 +3,7 @@ from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-file = "Dataset/Copy of Ransomware Attacks.xlsx"
+file = "Dataset/Copy_of_Ransomware_Attacks.xlsx"
 
 def run():
 

@@ -1,4 +1,6 @@
 import json
+import os
+
 import pandas as pd
 import plotly
 import plotly.graph_objs as go
@@ -14,24 +16,41 @@ import algorithm.RansomwareAttackByIndustryGraph as RansonwareAttackGraph
 
 import plotly.io as pio
 
+import patoolib
+
 app = Flask(__name__)
 
-train_model_file_location = 'dataset/updated_cve_2023_07_09.csv'
 analysis_file_location = 'dataset/vulnerabilities.csv'
+uncleaned_train_model_file_location = 'dataset/updated_cve_2023_07_19.xlsx'
+train_model_file_location = 'dataset/updated_cve_2023_07_19.csv'
+archive_path = "dataset/Dataset.rar"
 
-MAPPING, THRESHOLD, VARIABLES_OF_INTEREST = config.MAPPING, config.THRESHOLD, config.VARIABLES_OF_INTEREST
+file_paths_to_check = [
+    'dataset/vulnerabilities.csv',
+    'dataset/Full_FYP_crawled_edit.csv',
+    'dataset/Copy_of_Ransomware_Attacks.xlsx',
+    'dataset/updated_cve_2023_07_19.xlsx'
+    # Add more file paths here as needed
+]
+
+for file_path in file_paths_to_check:
+    if not os.path.isfile(file_path):
+        try:
+            # Extract the RAR archive to the destination directory
+            patoolib.extract_archive(archive_path, outdir='dataset')
+            print(f"RAR file '{file_path}' successfully extracted.")
+            print("Converting some file to csv")
+            dp.convert_xlsx_to_cleaned_csv(uncleaned_train_model_file_location,train_model_file_location)
+        except patoolib.util.PatoolError:
+            print(f"RAR file '{file_path}' not found or extraction failed.")
+
+
 
 df = dp.load_data(train_model_file_location)
 df_analysis = dp.load_data(analysis_file_location)
 
+VARIABLES_OF_INTEREST = config.VARIABLES_OF_INTEREST
 filtered_df = df.dropna(subset=VARIABLES_OF_INTEREST, how='all')
-
-
-
-# Store analysis results globally
-global analysis_results
-analysis_results = None
-
 
 
 @app.route('/')
@@ -97,6 +116,7 @@ def vendors():
 
     return render_template('vendors.html', graphJSON=graphJSON, graphJSON2=graphJSON2)
 
+
 @app.route('/vulnerabilities')
 def vulnerabilities():
     df_analysis_copy = df_analysis.copy()
@@ -111,7 +131,6 @@ def vulnerabilities():
     return render_template('vulnerabilities.html', graphJSON=graphJSON, graphJSON2=graphJSON2)
 
 
-
 @app.route('/ransomware')
 def ransomware_attacks():
     filename = 'Dataset/Full_FYP_crawled_edit.csv'
@@ -122,19 +141,19 @@ def ransomware_attacks():
     fig = dp.plot_ransomware_attacks(year_country_counts)
     # pio.show(fig)
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder) # Convert the graph to JSON
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)  # Convert the graph to JSON
 
     return render_template('Ransomware.html', graphJSON=graphJSON)
 
+
 @app.route('/predict')
 def plot():
-    predict_scores =  None
-    return render_template('predict.html',predict_scores=predict_scores)
+    predict_scores = None
+    return render_template('predict.html', predict_scores=predict_scores)
 
 
 @app.route('/submit', methods=['POST'])
 def submit():
-
     user_input_basedScore = float(request.form.get('user_input_basedScore'))
     user_input_exploitabilityScore = float(request.form.get('user_input_exploitabilityScore'))
     user_input_Mixed_impactScore = float(request.form.get('user_input_Mixed_impactScore'))
@@ -186,7 +205,7 @@ def submit():
     # Convert to JSON
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('predict.html', graphJSON=graphJSON ,predict_scores=predict_scores, accuracy=accuracy)
+    return render_template('predict.html', graphJSON=graphJSON, predict_scores=predict_scores, accuracy=accuracy)
 
 
 if __name__ == "__main__":
