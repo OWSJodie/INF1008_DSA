@@ -231,7 +231,7 @@ def count_countries_by_year_range(filename, start_year, end_year):
     - year_country_counts (dict): A dictionary containing the counts of countries for each year within the range.
     """
 
-    with open(filename, 'r', newline='', encoding='utf-8') as csvfile:
+    with open(filename, 'r', newline='', encoding='utf-8', errors= 'ignore') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)  # Read the header row
 
