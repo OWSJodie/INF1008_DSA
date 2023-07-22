@@ -33,8 +33,15 @@ file_paths_to_check = [
     # Add more file paths here as needed
 ]
 
+
+# Require to download WinRAR to extract the file!
+#IF don't have WinRAR run this code after Obtaining the File
+# dp.convert_xlsx_to_cleaned_csv(uncleaned_train_model_file_location, train_model_file_location)
+
+## Comment out these if don't have WinRAR! ###
 for file_path in file_paths_to_check:
     if not os.path.isfile(file_path):
+
         try:
             # Extract the RAR archive to the destination directory
             patoolib.extract_archive(archive_path, outdir='dataset')
@@ -43,6 +50,7 @@ for file_path in file_paths_to_check:
             dp.convert_xlsx_to_cleaned_csv(uncleaned_train_model_file_location, train_model_file_location)
         except patoolib.util.PatoolError:
             print(f"RAR file '{file_path}' not found or extraction failed.")
+#############################################
 
 df = dp.load_data(train_model_file_location)
 df_analysis = dp.load_data(analysis_file_location)
