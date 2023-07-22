@@ -40,11 +40,9 @@ for file_path in file_paths_to_check:
             patoolib.extract_archive(archive_path, outdir='dataset')
             print(f"RAR file '{file_path}' successfully extracted.")
             print("Converting some file to csv")
-            dp.convert_xlsx_to_cleaned_csv(uncleaned_train_model_file_location,train_model_file_location)
+            dp.convert_xlsx_to_cleaned_csv(uncleaned_train_model_file_location, train_model_file_location)
         except patoolib.util.PatoolError:
             print(f"RAR file '{file_path}' not found or extraction failed.")
-
-
 
 df = dp.load_data(train_model_file_location)
 df_analysis = dp.load_data(analysis_file_location)
@@ -149,7 +147,7 @@ def ransomware_attacks():
 @app.route('/predict')
 def plot():
     predict_scores = None
-    return render_template('predict.html', predict_scores=predict_scores)
+    return render_template('predict.html', predict_scores=predict_scores, synthetic_data=None)
 
 
 @app.route('/submit', methods=['POST'])
@@ -206,6 +204,47 @@ def submit():
     graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('predict.html', graphJSON=graphJSON, predict_scores=predict_scores, accuracy=accuracy)
+
+
+@app.route('/generate', methods=['POST'])
+def generate():
+    user_generate = int(request.form.get('user_generate'))
+
+    synthetic_data = dp.generate_synthetic_data(df, num_samples=user_generate)
+
+    # Train the model and get predicted probabilities
+    vulnerability_model = ml.VulnerabilityModel(df)
+
+    y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
+
+    y_pred = vulnerability_model.predict(synthetic_data)
+    y_pred_numeric = y_pred.astype(int)
+
+    # Create a histogram of the predicted probabilities
+    trace0 = go.Histogram(
+        x=y_pred_proba[y_test == 0],
+        opacity=0.75,
+        name='True Negatives'
+    )
+
+    trace1 = go.Histogram(
+        x=y_pred_proba[y_test == 1],
+        opacity=0.75,
+        name='True Positives'
+    )
+
+    trace2 = go.Histogram(
+        x=y_pred_numeric,  # Corrected here to use y_pred_numeric as x data
+        opacity=0.75,
+        name='Predicted'
+    )
+
+    data = [trace0, trace1, trace2]
+
+    # Convert to JSON
+    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('predict.html', graphJSON=graphJSON, synthetic_data=synthetic_data, y_pred=y_pred_numeric)
 
 
 if __name__ == "__main__":

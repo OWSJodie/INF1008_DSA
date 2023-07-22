@@ -102,13 +102,10 @@
 
 </body>
 
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-        var graph = {{ graphJSON | safe }};
-        Plotly.newPlot('plot', graph, {responsive: true});
-
-
-
+    var graph = {{ graphJSON | safe }};
+    Plotly.newPlot('plot', graph, {responsive: true});
 </script>
 
 </html>

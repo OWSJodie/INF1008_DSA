@@ -91,6 +91,8 @@ def generate_synthetic_data(df, num_samples=100):
         'Mixed_basedScore': np.random.choice(df['Mixed_basedScore'], num_samples),
         'Mixed_exploitabilityScore': np.random.choice(df['Mixed_exploitabilityScore'], num_samples),
         'Mixed_impactScore': np.random.choice(df['Mixed_impactScore'], num_samples),
+        'Mixed_obtainPrivilege': np.random.choice(df['Mixed_obtainPrivilege'], num_samples),
+        'Mixed_userInteractionRequired': np.random.choice(df['Mixed_userInteractionRequired'], num_samples),
     })
 
     return synthetic_data
