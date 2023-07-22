@@ -197,7 +197,7 @@ def analyze_attack_types_by_vendor(df):
 
     # Create the layout
     layout = go.Layout(
-        title='CVEs Time Series for Different Attacks by Vendor',
+        title='CVEs Time Series for Different Attacks on Vendor',
         xaxis=dict(title='Date', automargin=True),
         yaxis=dict(title='Vendor', automargin=True),
         showlegend=True,
