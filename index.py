@@ -167,6 +167,21 @@ def process_data():
     synthetic_data = None  # Set default value
     y_pred_numeric = None  # Set default value
 
+    # Train the model and get predicted probabilities
+    vulnerability_model = ml.VulnerabilityModel(df)
+    y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
+
+    # Evaluate the model
+    accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
+
+    # Print the metrics or send them to the front-end
+    print("Accuracy: ", accuracy)
+    print("Confusion Matrix: ", confusion)
+    print("Precision: ", precision)
+    print("Recall: ", recall)
+    print("F1 Score: ", f1)
+    print("AUC-ROC: ", auc_roc)
+
     # Check if the "Submit" button was clicked
     if request.form.get('submit_button') is not None:
         user_input_basedScore = float(request.form.get('user_input_basedScore'))
@@ -175,19 +190,7 @@ def process_data():
         user_input_obtain_privilege = int(request.form.get('user_input_obtain_privilege'))
         user_input_userinteraction = int(request.form.get('user_input_userinteraction'))
 
-        # Train the model and get predicted probabilities
-        vulnerability_model = ml.VulnerabilityModel(df)
-        y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
 
-        accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
-
-        # Print the metrics or send them to the front-end
-        print("Accuracy: ", accuracy)
-        print("Confusion Matrix: ", confusion)
-        print("Precision: ", precision)
-        print("Recall: ", recall)
-        print("F1 Score: ", f1)
-        print("AUC-ROC: ", auc_roc)
 
         # Create a histogram of the predicted probabilities
         trace0 = go.Histogram(
@@ -217,6 +220,7 @@ def process_data():
 
         accuracy = round(accuracy * 100, 2)
 
+
         # Convert to JSON
         graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -225,10 +229,6 @@ def process_data():
         user_generate = int(request.form.get('user_generate'))
 
         synthetic_data = dp.generate_synthetic_data(df, num_samples=user_generate)
-
-        # Train the model and get predicted probabilities
-        vulnerability_model = ml.VulnerabilityModel(df)
-        y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
 
         y_pred = vulnerability_model.predict(synthetic_data)
         y_pred_numeric = y_pred.astype(int)
