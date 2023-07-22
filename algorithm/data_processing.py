@@ -458,9 +458,50 @@ def plot_ransomware_attacks(result):
     # Show the figure
     return fig
 
+def top_5_vulnerability_bar_graph(df):
+
+    # Remove rows with missing 'attack_type'
+    df = df.dropna(subset=['attack_type'])
+
+    # convert the 'cve_published_date' column to datetime and extract year
+    df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format="%d/%m/%Y")
+    df['year'] = df['cve_published_date'].dt.year
+
+    # "explode" the attack_type column (transform each element of a list-like to a row)
+    df['attack_type'] = df['attack_type'].apply(ast.literal_eval)
+    df = df.explode('attack_type')
+
+    # Now we can group by year and attack_type, and count the frequencies
+    attack_counts = df.groupby(['year', 'attack_type']).size().reset_index(name='counts')
+
+    # Sort by counts in descending order and take the top 5 for each year
+    top_attacks = attack_counts.groupby('year').apply(lambda x: x.nlargest(5, 'counts')).reset_index(drop=True)
+
+    # Now we can plot the data
+    fig = px.bar(top_attacks, x='year', y='counts', color='attack_type', title='Top 5 Vulnerability Over The Years')
+    return fig
+
+def top_5_vulnerability_by_vendor(df):
+
+    # Remove rows with missing 'vendor'
+    df = df.dropna(subset=['vendor'])
+
+    # Convert the 'cve_published_date' column to datetime and extract year
+    df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format="%d/%m/%Y")
+    df['year'] = df['cve_published_date'].dt.year
+
+    # Now we can group by year and vendor, and count the frequencies
+    vendor_counts = df.groupby(['year', 'vendor']).size().reset_index(name='counts')
+
+    # Sort by counts in descending order and take the top 5 for each year
+    top_vendors = vendor_counts.groupby('year').apply(lambda x: x.nlargest(5, 'counts')).reset_index(drop=True)
+
+    # Now we can plot the data
+    fig = px.bar(top_vendors, x='year', y='counts', color='vendor', title='Top 5 Yearly Vulnerability by Vendor')
+
+    return fig
 
 # file_location = '../dataset/updated_cve_2023_07_09.xlsx'
 # csv_file_location = '../dataset/updated_cve_2023_07_09.csv'
 # convert_xlsx_to_cleaned_csv(file_location,csv_file_location)
-
 

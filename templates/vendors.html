@@ -64,6 +64,7 @@
     <!-- Page Content -->
     <div class="container">
         <div id="plotly-graph" class="chart"></div>
+        <div id="plotly-top-5-graph" class="chart"></div>
     </div>
     
     
@@ -76,5 +77,8 @@
 
         // Display the graph using Plotly.js
         Plotly.newPlot('plotly-graph', graphJSON.data, graphJSON.layout);
+
+        var graphJSON2 = {{ graphJSON2 | safe}};
+        Plotly.newPlot('plotly-top-5-graph', graphJSON2, {responsive: true});
     </script>
 </html>

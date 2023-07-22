@@ -64,7 +64,11 @@
     <!-- Page Content -->
     <div class="container">
         <div id="plotly-graph" class="chart"></div>
-    </div>
+        <div id="plotly-top-5-graph" class="chart"></div>
+
+
+
+
     
     
 </body>
@@ -78,5 +82,9 @@
         yaxis: { title: 'Number of Vulnerabilities' }
     };
     Plotly.newPlot('plotly-graph', traces, layout, {responsive: true});
+
+    var graphJSON2 = {{ graphJSON2 | safe}};
+    Plotly.newPlot('plotly-top-5-graph', graphJSON2, {responsive: true});
+
     </script>
 </html>

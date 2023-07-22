@@ -36,7 +36,7 @@ analysis_results = None
 
 @app.route('/')
 def index():
-    return redirect("/analytics", code=302)
+    return redirect("/news", code=302)
 
 
 @app.route('/resources')
@@ -87,19 +87,29 @@ def cyber_attack_news():
 
 @app.route('/vendors')
 def vendors():
-    fig = dp.analyze_attack_types_by_vendor(df_analysis)
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    df_analysis_copy = df_analysis.copy()
+    fig = dp.analyze_attack_types_by_vendor(df_analysis_copy)
+    df_analysis_copy = df_analysis.copy()
+    fig_top_5 = dp.top_5_vulnerability_by_vendor(df_analysis_copy)
 
-    return render_template('vendors.html', graphJSON=graphJSON)
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON2 = fig_top_5.to_json()
+
+    return render_template('vendors.html', graphJSON=graphJSON, graphJSON2=graphJSON2)
 
 @app.route('/vulnerabilities')
 def vulnerabilities():
-    fig_yearly = dp.analyze_attack_types_time_series(df_analysis, frequency='year')
+    df_analysis_copy = df_analysis.copy()
+    fig_yearly = dp.analyze_attack_types_time_series(df_analysis_copy, frequency='year')
+    df_analysis_copy = df_analysis.copy()
+    fig_top_5 = dp.top_5_vulnerability_bar_graph(df_analysis_copy)
 
     # Convert to JSON
     graphJSON = fig_yearly.to_json()
+    graphJSON2 = fig_top_5.to_json()
 
-    return render_template('vulnerabilities.html', graphJSON=graphJSON)
+    return render_template('vulnerabilities.html', graphJSON=graphJSON, graphJSON2=graphJSON2)
+
 
 
 @app.route('/ransomware')
