@@ -87,7 +87,7 @@
     Prediction
     <div class="row">
         <div class="col">
-            <form action="/submit" method="POST">
+            <form action="/process_data" method="POST">
                 <div class="row">
                     <div class=" col-12 d-flex justify-content-between">
                         <text>Base Score:</text>
@@ -109,12 +109,9 @@
                         <text>User Interaction:</text>
                         <input max="1" min="0" name="user_input_userinteraction" placeholder=""
                                type="number" required style = "width:50px"></div>
-                    <div class=" col-12 "><input type="submit" value="Submit"></div>
+                    <div class=" col-12 "><input type="submit" name="submit_button" value="Submit"></div>
                 </div>
             </form>
-
-
-
         </div>
         <div class="col">
             {% if predict_scores is not none %}
@@ -127,51 +124,52 @@
             {% else %}
             <p>No prediction scores available.</p>
             {% endif %}
-
         </div>
     </div>
     <div class="mt-1" id="plot"></div>
-        <div class="col mt-5">
-
-            <form action="/generate" method="POST">
-                <div class="col d-flex justify-content-center"><text class="mr-3">Generate prediction data, Numbers:</text><input min="0" name="user_generate" placeholder=""
-                   type="number" required style = "width:200px"><input type="submit" value="Generate"></div>
-            </form>
-
-            {% if synthetic_data is not none %}
-            <h3>Prediction Results</h3>
-            <div class="table-responsive table-container mb-5">
-                <table class="table table-bordered">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Index</th>
-                            <th>Based Score</th>
-                            <th>Exploitability Score</th>
-                            <th>Impact Score</th>
-                            <th>Obtain Privilege</th>
-                            <th>User InteractionRequired</th>
-                            <th>Predicted</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for index, row in synthetic_data.iterrows() %}
-                            <tr>
-                                <td>{{ index }}</td>
-                                <td>{{ row['Mixed_basedScore'] }}</td>
-                                <td>{{ row['Mixed_exploitabilityScore'] }}</td>
-                                <td>{{ row['Mixed_impactScore'] }}</td>
-                                <td>{{ row['Mixed_obtainPrivilege'] }}</td>
-                                <td>{{ row['Mixed_userInteractionRequired'] }}</td>
-                                <td>{{ y_pred[index] }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="col mt-5">
+        <form action="/process_data" method="POST">
+            <div class="col d-flex justify-content-center">
+                <text class="mr-3">Generate prediction data, Numbers:</text>
+                <input min="0" name="user_generate" placeholder="" type="number" required style="width:200px">
+                <input type="submit" name="generate_button" value="Generate">
             </div>
-            {% else %}
-            <p>No generated data table available.</p>
-            {% endif %}
+        </form>
+
+        {% if synthetic_data is not none %}
+        <h3>Prediction Results</h3>
+        <div class="table-responsive table-container mb-5">
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Index</th>
+                    <th>Based Score</th>
+                    <th>Exploitability Score</th>
+                    <th>Impact Score</th>
+                    <th>Obtain Privilege</th>
+                    <th>User InteractionRequired</th>
+                    <th>Predicted</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for index, row in synthetic_data.iterrows() %}
+                <tr>
+                    <td>{{ index }}</td>
+                    <td>{{ row['Mixed_basedScore'] }}</td>
+                    <td>{{ row['Mixed_exploitabilityScore'] }}</td>
+                    <td>{{ row['Mixed_impactScore'] }}</td>
+                    <td>{{ row['Mixed_obtainPrivilege'] }}</td>
+                    <td>{{ row['Mixed_userInteractionRequired'] }}</td>
+                    <td>{{ y_pred[index] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
+        {% else %}
+        <p>No generated data table available.</p>
+        {% endif %}
+    </div>
 
 </div>
 
@@ -179,10 +177,9 @@
 </body>
 
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script>
-        var graph = {{ graphJSON | safe }};
-        Plotly.newPlot('plot', graph, {responsive: true});
+    var graph = {{ graphJSON | safe }};
+    Plotly.newPlot('plot', graph, {responsive: true});
 </script>
 
 </html>

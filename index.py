@@ -158,101 +158,107 @@ def plot():
     return render_template('predict.html', predict_scores=predict_scores, synthetic_data=None)
 
 
-@app.route('/submit', methods=['POST'])
-def submit():
-    user_input_basedScore = float(request.form.get('user_input_basedScore'))
-    user_input_exploitabilityScore = float(request.form.get('user_input_exploitabilityScore'))
-    user_input_Mixed_impactScore = float(request.form.get('user_input_Mixed_impactScore'))
-    user_input_obtain_privilege = int(request.form.get('user_input_obtain_privilege'))
-    user_input_userinteraction = int(request.form.get('user_input_userinteraction'))
+@app.route('/process_data', methods=['POST'])
+def process_data():
+    global predict_scores, accuracy, synthetic_data, y_pred_numeric
 
-    # Train the model and get predicted probabilities
-    vulnerability_model = ml.VulnerabilityModel(df)
-    y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
+    predict_scores = None  # Set default value
+    accuracy = None  # Set default value
+    synthetic_data = None  # Set default value
+    y_pred_numeric = None  # Set default value
 
-    accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
+    # Check if the "Submit" button was clicked
+    if request.form.get('submit_button') is not None:
+        user_input_basedScore = float(request.form.get('user_input_basedScore'))
+        user_input_exploitabilityScore = float(request.form.get('user_input_exploitabilityScore'))
+        user_input_Mixed_impactScore = float(request.form.get('user_input_Mixed_impactScore'))
+        user_input_obtain_privilege = int(request.form.get('user_input_obtain_privilege'))
+        user_input_userinteraction = int(request.form.get('user_input_userinteraction'))
 
-    # Print the metrics or send them to the front-end
-    print("Accuracy: ", accuracy)
-    print("Confusion Matrix: ", confusion)
-    print("Precision: ", precision)
-    print("Recall: ", recall)
-    print("F1 Score: ", f1)
-    print("AUC-ROC: ", auc_roc)
+        # Train the model and get predicted probabilities
+        vulnerability_model = ml.VulnerabilityModel(df)
+        y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
 
-    # Create a histogram of the predicted probabilities
-    trace0 = go.Histogram(
-        x=y_pred_proba[y_test == 0],
-        opacity=0.75,
-        name='True Negatives'
-    )
+        accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
 
-    trace1 = go.Histogram(
-        x=y_pred_proba[y_test == 1],
-        opacity=0.75,
-        name='True Positives'
-    )
+        # Print the metrics or send them to the front-end
+        print("Accuracy: ", accuracy)
+        print("Confusion Matrix: ", confusion)
+        print("Precision: ", precision)
+        print("Recall: ", recall)
+        print("F1 Score: ", f1)
+        print("AUC-ROC: ", auc_roc)
 
-    data = [trace0, trace1]
+        # Create a histogram of the predicted probabilities
+        trace0 = go.Histogram(
+            x=y_pred_proba[y_test == 0],
+            opacity=0.75,
+            name='True Negatives'
+        )
 
-    new_data = pd.DataFrame({
-        'Mixed_basedScore': [user_input_basedScore],
-        'Mixed_exploitabilityScore': [user_input_exploitabilityScore],
-        'Mixed_impactScore': [user_input_Mixed_impactScore],
-        'Mixed_obtainPrivilege': [user_input_obtain_privilege],
-        'Mixed_userInteractionRequired': [user_input_userinteraction]
-    })
+        trace1 = go.Histogram(
+            x=y_pred_proba[y_test == 1],
+            opacity=0.75,
+            name='True Positives'
+        )
 
-    predict_scores = vulnerability_model.predict(new_data)
-    predict_scores = (predict_scores[predict_scores == 1].shape[0] / predict_scores.shape[0]) * 100
+        data = [trace0, trace1]
 
-    accuracy = round(accuracy * 100, 2)
+        new_data = pd.DataFrame({
+            'Mixed_basedScore': [user_input_basedScore],
+            'Mixed_exploitabilityScore': [user_input_exploitabilityScore],
+            'Mixed_impactScore': [user_input_Mixed_impactScore],
+            'Mixed_obtainPrivilege': [user_input_obtain_privilege],
+            'Mixed_userInteractionRequired': [user_input_userinteraction]
+        })
 
-    # Convert to JSON
-    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+        predict_scores = vulnerability_model.predict(new_data)
+        predict_scores = (predict_scores[predict_scores == 1].shape[0] / predict_scores.shape[0]) * 100
 
-    return render_template('predict.html', graphJSON=graphJSON, predict_scores=predict_scores, accuracy=accuracy)
+        accuracy = round(accuracy * 100, 2)
 
+        # Convert to JSON
+        graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-@app.route('/generate', methods=['POST'])
-def generate():
-    user_generate = int(request.form.get('user_generate'))
+    # Check if the "Generate" button was clicked
+    elif request.form.get('generate_button') is not None:
+        user_generate = int(request.form.get('user_generate'))
 
-    synthetic_data = dp.generate_synthetic_data(df, num_samples=user_generate)
+        synthetic_data = dp.generate_synthetic_data(df, num_samples=user_generate)
 
-    # Train the model and get predicted probabilities
-    vulnerability_model = ml.VulnerabilityModel(df)
+        # Train the model and get predicted probabilities
+        vulnerability_model = ml.VulnerabilityModel(df)
+        y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
 
-    y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
+        y_pred = vulnerability_model.predict(synthetic_data)
+        y_pred_numeric = y_pred.astype(int)
 
-    y_pred = vulnerability_model.predict(synthetic_data)
-    y_pred_numeric = y_pred.astype(int)
+        # Create a histogram of the predicted probabilities
+        trace0 = go.Histogram(
+            x=y_pred_proba[y_test == 0],
+            opacity=0.75,
+            name='True Negatives'
+        )
 
-    # Create a histogram of the predicted probabilities
-    trace0 = go.Histogram(
-        x=y_pred_proba[y_test == 0],
-        opacity=0.75,
-        name='True Negatives'
-    )
+        trace1 = go.Histogram(
+            x=y_pred_proba[y_test == 1],
+            opacity=0.75,
+            name='True Positives'
+        )
 
-    trace1 = go.Histogram(
-        x=y_pred_proba[y_test == 1],
-        opacity=0.75,
-        name='True Positives'
-    )
+        trace2 = go.Histogram(
+            x=y_pred_numeric,
+            opacity=0.75,
+            name='Predicted'
+        )
 
-    trace2 = go.Histogram(
-        x=y_pred_numeric,  # Corrected here to use y_pred_numeric as x data
-        opacity=0.75,
-        name='Predicted'
-    )
+        data = [trace0, trace1, trace2]
 
-    data = [trace0, trace1, trace2]
+        # Convert to JSON
+        graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-    # Convert to JSON
-    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+    return render_template('predict.html', graphJSON=graphJSON, predict_scores=predict_scores, accuracy=accuracy, synthetic_data=synthetic_data, y_pred_numeric=y_pred_numeric, y_pred=y_pred_numeric)
 
-    return render_template('predict.html', graphJSON=graphJSON, synthetic_data=synthetic_data, y_pred=y_pred_numeric)
 
 
 if __name__ == "__main__":
