@@ -1,5 +1,5 @@
 # Configuration values
-THRESHOLD = 2.5
+THRESHOLD = 3
 MAPPING = {
     'LOW': 2.5,
     'MEDIUM': 5,

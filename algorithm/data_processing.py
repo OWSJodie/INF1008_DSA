@@ -97,6 +97,17 @@ def generate_synthetic_data(df, num_samples=100):
 
     return synthetic_data
 
+
+def clean_attack_types(types):
+    # Function to clean the attack_type values and extract individual attack types
+    if isinstance(types, str):
+        types_list = ast.literal_eval(types)
+        cleaned_types = [t.strip('[]\'"') for t in types_list]
+        return cleaned_types
+    else:
+        return []
+
+
 def analyze_attack_types_time_series(df, frequency='month'):
     """
     Analyze the time series of each unique individual attack.
@@ -111,15 +122,6 @@ def analyze_attack_types_time_series(df, frequency='month'):
 
     # Convert the 'cve_published_date' column to the appropriate date format
     df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format='%d/%m/%Y')
-
-    # Function to clean the attack_type values and extract individual attack types
-    def clean_attack_types(types):
-        if isinstance(types, str):
-            types_list = ast.literal_eval(types)
-            cleaned_types = [t.strip('[]\'"') for t in types_list]
-            return cleaned_types
-        else:
-            return []
 
     # Clean the 'attack_type' column and create a new column with cleaned attack types
     df['cleaned_attack_type'] = df['attack_type'].apply(clean_attack_types)
@@ -175,15 +177,6 @@ def analyze_attack_types_by_vendor(df):
 
     # Convert the 'cve_published_date' column to the appropriate date format
     df['cve_published_date'] = pd.to_datetime(df['cve_published_date'], format='%d/%m/%Y')
-
-    # Function to clean the attack_type values and extract individual attack types
-    def clean_attack_types(types):
-        if isinstance(types, str):
-            types_list = ast.literal_eval(types)
-            cleaned_types = [t.strip('[]\'"') for t in types_list]
-            return cleaned_types
-        else:
-            return []
 
     # Clean the 'attack_type' column and create a new column with cleaned attack types
     df['cleaned_attack_type'] = df['attack_type'].apply(clean_attack_types)

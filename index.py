@@ -29,7 +29,8 @@ file_paths_to_check = [
     'dataset/vulnerabilities.csv',
     'dataset/Full_FYP_crawled_edit.csv',
     'dataset/Copy_of_Ransomware_Attacks.xlsx',
-    'dataset/updated_cve_2023_07_19.xlsx'
+    'dataset/updated_cve_2023_07_19.xlsx',
+    'dataset/updated_cve_2023_07_19.csv'
     # Add more file paths here as needed
 ]
 
@@ -41,7 +42,7 @@ file_paths_to_check = [
 ## Comment out these if don't have WinRAR! ###
 for file_path in file_paths_to_check:
     if not os.path.isfile(file_path):
-
+        print(file_path)
         try:
             # Extract the RAR archive to the destination directory
             patoolib.extract_archive(archive_path, outdir='dataset')
@@ -169,7 +170,7 @@ def process_data():
 
     # Train the model and get predicted probabilities
     vulnerability_model = ml.VulnerabilityModel(df)
-    y_test, y_pred_proba, X_test = vulnerability_model.train_model(3)
+    y_test, y_pred_proba, X_test = vulnerability_model.train_model(config.THRESHOLD)
 
     # Evaluate the model
     accuracy, confusion, precision, recall, f1, auc_roc = vulnerability_model.evaluate_model(X_test, y_test)
