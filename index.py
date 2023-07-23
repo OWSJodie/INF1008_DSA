@@ -159,7 +159,7 @@ def plot():
     return render_template('predict.html', predict_scores=predict_scores, synthetic_data=None)
 
 
-@app.route('/process_data', methods=['POST'])
+@app.route('/predict/process_data', methods=['POST'])
 def process_data():
     global predict_scores, accuracy, synthetic_data, y_pred_numeric
 
